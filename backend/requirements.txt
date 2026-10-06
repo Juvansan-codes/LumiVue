@@ -1,0 +1,30 @@
+# =============================================================================
+# LumiVue Backend — Python Dependencies
+# =============================================================================
+# Install with: pip install -r requirements.txt
+# =============================================================================
+
+# ---- Web Framework ----
+fastapi>=0.115.0,<1.0.0
+uvicorn[standard]>=0.30.0,<1.0.0
+python-multipart>=0.0.9
+
+# ---- Data Validation ----
+pydantic>=2.9.0,<3.0.0
+pydantic-settings>=2.5.0,<3.0.0
+
+# ---- AI / Deep Learning ----
+torch>=2.4.0
+torchvision>=0.19.0
+transformers>=4.45.0
+accelerate>=0.34.0
+bitsandbytes>=0.43.0; sys_platform != "win32"
+
+# ---- Computer Vision ----
+opencv-python-headless>=4.10.0
+Pillow>=10.4.0
+pydicom>=2.4.0
+
+# ---- Scientific ----
+numpy>=1.26.0,<2.0.0
+scikit-learn>=1.5.0

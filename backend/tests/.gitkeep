@@ -1,0 +1,3 @@
+# LumiVue — Backend Tests
+# Place pytest test files here.
+# Run with: pytest tests/

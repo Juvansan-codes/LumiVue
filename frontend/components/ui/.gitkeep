@@ -1,0 +1,7 @@
+// =============================================================================
+// ui/ — shadcn/ui components directory
+// =============================================================================
+// This directory will contain shadcn/ui primitives (Button, Card, Dialog, etc.)
+// Install components using: npx shadcn@latest add <component>
+// See: https://ui.shadcn.com
+// =============================================================================

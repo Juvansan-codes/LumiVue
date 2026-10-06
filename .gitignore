@@ -1,0 +1,77 @@
+# =========================
+# LumiVue .gitignore
+# =========================
+
+# ---- Environment / Secrets ----
+.env
+.env.local
+.env.*.local
+
+# ---- Node / Frontend ----
+node_modules/
+.next/
+out/
+frontend/.next/
+frontend/node_modules/
+frontend/out/
+*.tsbuildinfo
+next-env.d.ts
+
+# ---- Python / Backend ----
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.venv/
+venv/
+env/
+backend/.venv/
+backend/venv/
+*.egg-info/
+dist/
+build/
+*.egg
+
+# ---- AI / Model Artifacts ----
+*.pth
+*.pt
+*.ckpt
+*.safetensors
+*.bin
+*.onnx
+backend/models/*.pth
+backend/models/*.pt
+backend/models/*.ckpt
+
+# ---- Dataset / Medical Data ----
+*.dcm
+*.nii
+*.nii.gz
+backend/data/raw/
+backend/data/processed/
+
+# ---- IDE / Editor ----
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ---- OS ----
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- Logs ----
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ---- Testing ----
+coverage/
+.coverage
+htmlcov/
+.pytest_cache/

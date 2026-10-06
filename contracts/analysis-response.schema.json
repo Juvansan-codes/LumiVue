@@ -1,0 +1,84 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "LumiVue Analysis Response",
+  "description": "Shared API contract for the analysis response. This is the single source of truth used by both frontend and backend teams.",
+  "type": "object",
+  "required": [
+    "analysis_id",
+    "finding",
+    "model_score",
+    "confidence",
+    "image_quality",
+    "image_evidence",
+    "clinical_evidence",
+    "explanation"
+  ],
+  "properties": {
+    "analysis_id": {
+      "type": "string",
+      "description": "Unique identifier for this analysis run (e.g., 'demo-001', UUID)"
+    },
+    "finding": {
+      "type": "string",
+      "enum": [
+        "suspected_pneumonia",
+        "no_pneumonia_detected",
+        "inconclusive",
+        "rejected"
+      ],
+      "description": "The finding category determined by the analysis pipeline"
+    },
+    "model_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "Raw DenseNet-121 model prediction score (0.0 = normal, 1.0 = pneumonia)"
+    },
+    "confidence": {
+      "type": "string",
+      "enum": ["low", "moderate", "high"],
+      "description": "Overall confidence level computed by the confidence engine"
+    },
+    "image_quality": {
+      "type": "string",
+      "enum": ["good", "acceptable", "poor", "rejected"],
+      "description": "Image quality assessment result"
+    },
+    "image_evidence": {
+      "type": "object",
+      "required": ["available", "heatmap_available"],
+      "properties": {
+        "available": {
+          "type": "boolean",
+          "description": "Whether image-based evidence is available"
+        },
+        "bbox": {
+          "type": ["array", "null"],
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 4,
+          "maxItems": 4,
+          "description": "Bounding box [x_min, y_min, x_max, y_max] of the region of interest"
+        },
+        "heatmap_available": {
+          "type": "boolean",
+          "description": "Whether a Grad-CAM heatmap overlay is available"
+        }
+      },
+      "description": "Image-level evidence (bounding box, heatmap)"
+    },
+    "clinical_evidence": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Clinical evidence items that support the finding"
+    },
+    "explanation": {
+      "type": "string",
+      "description": "Human-readable explanation for the clinician"
+    }
+  },
+  "additionalProperties": false
+}
