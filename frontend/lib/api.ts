@@ -4,7 +4,7 @@
 // All HTTP calls go through this module. Components NEVER call fetch() directly.
 //
 // Modes:
-//   MOCK  — Returns mock data (NEXT_PUBLIC_USE_MOCK=true)
+//   MOCK  — Returns mock data with simulated pipeline (NEXT_PUBLIC_USE_MOCK=true or default)
 //   REAL  — Hits the FastAPI backend (NEXT_PUBLIC_API_BASE_URL)
 // =============================================================================
 
@@ -12,12 +12,15 @@ import type {
   AnalysisResponse,
   HealthResponse,
   ModelInfoResponse,
+  PatientContext,
+  PipelineStep,
 } from "./types";
 import {
   mockAnalysisResponse,
   mockHealthResponse,
   mockModelInfoResponse,
   simulateDelay,
+  simulatePipeline,
 } from "./mock-data";
 
 // ---------------------------------------------------------------------------
@@ -27,7 +30,8 @@ import {
 const API_BASE_URL: string =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
 
-const USE_MOCK: boolean = process.env.NEXT_PUBLIC_USE_MOCK === "true";
+const USE_MOCK: boolean =
+  process.env.NEXT_PUBLIC_USE_MOCK !== "false"; // default to mock
 
 // ---------------------------------------------------------------------------
 // Internal helpers
@@ -84,21 +88,27 @@ export async function getModelInfo(): Promise<ModelInfoResponse> {
 
 /**
  * POST /analyze — sends a chest X-ray image (and optional patient context)
- * for analysis and returns the evidence-grounded result.
+ * for analysis. Returns the evidence-grounded result.
+ *
+ * In mock mode, simulates a pipeline with step-by-step progress.
  */
 export async function analyzeXray(
   image: File,
-  patientContext?: string,
+  patientContext?: PatientContext,
+  onPipelineUpdate?: (steps: PipelineStep[]) => void,
 ): Promise<AnalysisResponse> {
   if (USE_MOCK) {
-    await simulateDelay(1200);
+    if (onPipelineUpdate) {
+      return simulatePipeline(onPipelineUpdate);
+    }
+    await simulateDelay(2000);
     return mockAnalysisResponse;
   }
 
   const formData = new FormData();
   formData.append("image", image);
   if (patientContext) {
-    formData.append("patient_context", patientContext);
+    formData.append("patient_context", JSON.stringify(patientContext));
   }
 
   return request<AnalysisResponse>("/analyze", {
