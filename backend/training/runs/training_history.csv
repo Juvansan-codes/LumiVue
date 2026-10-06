@@ -1,0 +1,6 @@
+epoch,stage,train_loss,val_loss,val_roc_auc,val_pr_auc
+1,Stage 1 (Frozen Backbone),1.0378,1.0413,0.6567,0.4009
+2,Stage 1 (Frozen Backbone),1.0029,0.9933,0.7182,0.4513
+3,Stage 1 (Frozen Backbone),1.0037,0.9641,0.7398,0.4721
+4,Stage 1 (Frozen Backbone),0.9782,0.9505,0.7491,0.4839
+5,Stage 2 (Fine-tuning),0.9391,0.8850,0.7877,0.5411

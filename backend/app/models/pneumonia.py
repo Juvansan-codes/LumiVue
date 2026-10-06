@@ -6,24 +6,27 @@ Owner: Backend Member 3 (DenseNet / Dataset / Preprocessing)
 Interface for the DenseNet-121 pneumonia classifier.
 
 Usage:
-    model = PneumoniaModel(model_path="models/lumivue_densenet121_rsna.pth")
+    model = PneumoniaModel(device="cuda")
+    # For training
+    model.train()
+    logits = model(images)
+    
+    # For inference
+    model.load_checkpoint("models/lumivue_densenet121_rsna.pth")
     score = model.predict(image_tensor)
-
-TODO:
-    - Load DenseNet-121 weights from checkpoint
-    - Implement predict() with proper preprocessing
-    - Add batch prediction support
-    - Add model warm-up on startup
 """
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
+from pathlib import Path
 
-# Future imports:
-# import torch
-# import torchvision.models as models
-# from PIL import Image
+import torch
+import torch.nn as nn
+import torchvision.models as models
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -34,46 +37,72 @@ class PredictionResult:
     raw_logits: list[float] | None = None
 
 
-class PneumoniaModel:
+class PneumoniaModel(nn.Module):
     """
     DenseNet-121 based pneumonia classifier.
-
     Trained on the RSNA Pneumonia Detection Challenge dataset.
     """
 
-    def __init__(self, model_path: str = "models/lumivue_densenet121_rsna.pth"):
-        self.model_path = model_path
-        self._model = None
-        # TODO: Load model weights
+    def __init__(self, device: str = "cpu"):
+        super().__init__()
+        self.device = torch.device(device)
+        
+        # Load ImageNet-pretrained DenseNet-121
+        logger.info("Loading pretrained DenseNet-121...")
+        # Note: weights=models.DenseNet121_Weights.DEFAULT is standard in newer torchvision
+        self.backbone = models.densenet121(weights=models.DenseNet121_Weights.DEFAULT)
+        
+        # Replace the final classifier for binary classification
+        num_ftrs = self.backbone.classifier.in_features
+        self.backbone.classifier = nn.Linear(num_ftrs, 1)
+        
+        self.to(self.device)
 
-    def load(self) -> None:
-        """Load model weights from disk."""
-        # TODO: Implement model loading
-        # self._model = models.densenet121(pretrained=False)
-        # self._model.classifier = torch.nn.Linear(1024, 1)
-        # self._model.load_state_dict(torch.load(self.model_path))
-        # self._model.eval()
-        pass
-
-    def predict(self, image_bytes: bytes) -> PredictionResult:
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
-        Predict pneumonia probability from a chest X-ray image.
+        Forward pass.
+        Returns raw logits (use BCEWithLogitsLoss for training).
+        """
+        return self.backbone(x)
+
+    def load_checkpoint(self, checkpoint_path: str | Path) -> None:
+        """Load model weights from disk."""
+        path = Path(checkpoint_path)
+        if not path.exists():
+            raise FileNotFoundError(f"Checkpoint not found at {path}")
+            
+        logger.info(f"Loading checkpoint from {path}")
+        state_dict = torch.load(path, map_location=self.device)
+        
+        # Handle DataParallel wrapped dicts if necessary
+        if "state_dict" in state_dict:
+            state_dict = state_dict["state_dict"]
+            
+        self.load_state_dict(state_dict)
+        self.eval()
+
+    def predict(self, image_tensor: torch.Tensor) -> PredictionResult:
+        """
+        Predict pneumonia probability from a preprocessed image tensor.
 
         Parameters
         ----------
-        image_bytes : bytes
-            Raw bytes of the preprocessed image.
+        image_tensor : torch.Tensor
+            Preprocessed image tensor of shape (1, 3, 224, 224).
 
         Returns
         -------
         PredictionResult
             Contains the pneumonia probability score.
         """
-        # TODO: Implement real inference
-        # Placeholder returns a mock score
-        return PredictionResult(score=0.82)
-
-    @property
-    def is_loaded(self) -> bool:
-        """Whether the model weights have been loaded."""
-        return self._model is not None
+        self.eval()
+        image_tensor = image_tensor.to(self.device)
+        
+        with torch.no_grad():
+            logits = self.forward(image_tensor)
+            prob = torch.sigmoid(logits).item()
+            
+        return PredictionResult(
+            score=prob,
+            raw_logits=[logits.item()]
+        )

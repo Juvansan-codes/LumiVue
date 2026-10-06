@@ -61,7 +61,7 @@ def compute_confidence(
     if model_score >= 0.75 and clinical_support and model_agreement:
         return "high"
 
-    if model_score >= 0.5:
+    if model_score >= 0.60:
         return "moderate"
 
     return "low"
