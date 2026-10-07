@@ -61,7 +61,9 @@ def main():
     if not checkpoint_path.exists():
         raise FileNotFoundError(f"V2 Checkpoint not found at {checkpoint_path}")
         
-    model.load_checkpoint(checkpoint_path)
+    # Load the V2 checkpoint (saved as backbone.state_dict() by train.py)
+    state_dict = torch.load(checkpoint_path, map_location=device, weights_only=True)
+    model.backbone.load_state_dict(state_dict)
     model.eval()
     
     y_true = []

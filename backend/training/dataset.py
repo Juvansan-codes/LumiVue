@@ -23,35 +23,15 @@ from torchvision import transforms
 logger = logging.getLogger(__name__)
 
 
-def preprocess_dicom_to_tensor(dicom_ds: pydicom.dataset.FileDataset) -> torch.Tensor:
+def preprocess_png_to_tensor(image_pil: Image.Image) -> torch.Tensor:
     """
-    Preprocess a DICOM dataset to a model-compatible tensor (3-channel, 224x224).
+    Preprocess a PNG image to a model-compatible tensor (3-channel, 224x224).
     """
-    # 1. Extract pixel array
-    pixel_array = dicom_ds.pixel_array.astype(np.float32)
-
-    # 2. Normalize to 0-1 range
-    # RSNA images are generally 8-bit (0-255) but check max to be safe
-    v_max = pixel_array.max()
-    if v_max > 0:
-        pixel_array = pixel_array / v_max
-
-    # 3. Convert grayscale to 3-channel (copy channels)
-    # Shape becomes (H, W, 3)
-    image_3c = np.stack((pixel_array,) * 3, axis=-1)
-
-    # Convert to PIL Image for torchvision transforms
-    # Scale back to 0-255 uint8 for PIL
-    image_pil = Image.fromarray((image_3c * 255).astype(np.uint8))
-
-    # 4. Resize and convert to tensor
     transform = transforms.Compose([
-        transforms.Resize((224, 224)),
         transforms.ToTensor(),
         # ImageNet normalization (DenseNet expects this)
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ])
-
     tensor = transform(image_pil)
     return tensor
 
@@ -68,7 +48,7 @@ class RSNAPneumoniaDataset(Dataset):
         self.transform = transform
         self.subset_size = subset_size
         
-        self.images_dir = self.data_dir / "stage_2_train_images"
+        self.images_dir = self.data_dir.parent / "processed_pngs" / "stage_2_train_images"
         self.labels_file = self.data_dir / "stage_2_train_labels.csv"
         
         self.patient_data = []
@@ -135,13 +115,13 @@ class RSNAPneumoniaDataset(Dataset):
             target = max([r["target"] for r in records])
             bboxes = [r["bbox"] for r in records if r["bbox"] is not None]
             
-            dicom_path = self.images_dir / f"{pid}.dcm"
+            png_path = self.images_dir / f"{pid}.png"
             
             self.patient_data.append({
                 "patient_id": pid,
                 "target": target,
                 "bboxes": bboxes,
-                "dicom_path": dicom_path
+                "png_path": png_path
             })
 
     def __len__(self) -> int:
@@ -149,26 +129,23 @@ class RSNAPneumoniaDataset(Dataset):
 
     def __getitem__(self, idx: int) -> dict[str, Any]:
         data = self.patient_data[idx]
-        dicom_path = data["dicom_path"]
+        png_path = data["png_path"]
         patient_id = data["patient_id"]
         
-        if not dicom_path.exists():
-            raise FileNotFoundError(f"DICOM file not found: {dicom_path}")
+        if not png_path.exists():
+            raise FileNotFoundError(f"PNG file not found: {png_path}")
             
         try:
-            dicom_ds = pydicom.dcmread(dicom_path)
-            # Basic validation
-            if not hasattr(dicom_ds, "pixel_array"):
-                raise ValueError(f"No pixel_array in DICOM: {dicom_path}")
-                
-            original_shape = dicom_ds.pixel_array.shape
+            image_pil = Image.open(png_path).convert("RGB")
+            # We mock the original shape to 1024x1024 so bounding boxes get scaled properly.
+            original_shape = (1024, 1024)
             
             if self.transform:
                 # Custom transform path
-                image = self.transform(dicom_ds)
+                image = self.transform(image_pil)
             else:
                 # Default preprocessing pipeline
-                image = preprocess_dicom_to_tensor(dicom_ds)
+                image = preprocess_png_to_tensor(image_pil)
                 
             # Scale bounding boxes to 224x224
             # original shape is usually (1024, 1024) for RSNA

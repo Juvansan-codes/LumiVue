@@ -80,38 +80,19 @@ def main():
     # 2. DATASETS & AUGMENTATION
     data_dir = Path("data/raw")
     
-    import pydicom
-    from PIL import Image
-    import numpy as np
+    train_transform = transforms.Compose([
+        transforms.RandomRotation(5),
+        transforms.ColorJitter(brightness=0.1, contrast=0.1),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    ])
+    val_transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    ])
     
-    def get_transform(is_train=True):
-        def transform_fn(dicom_ds):
-            pixel_array = dicom_ds.pixel_array.astype(np.float32)
-            v_max = pixel_array.max()
-            if v_max > 0:
-                pixel_array = pixel_array / v_max
-            image_3c = np.stack((pixel_array,) * 3, axis=-1)
-            image_pil = Image.fromarray((image_3c * 255).astype(np.uint8))
-            
-            if is_train:
-                t = transforms.Compose([
-                    transforms.Resize((224, 224)),
-                    transforms.RandomRotation(5),
-                    transforms.ColorJitter(brightness=0.1, contrast=0.1),
-                    transforms.ToTensor(),
-                    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-                ])
-            else:
-                t = transforms.Compose([
-                    transforms.Resize((224, 224)),
-                    transforms.ToTensor(),
-                    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-                ])
-            return t(image_pil)
-        return transform_fn
-    
-    train_dataset = RSNAPneumoniaDataset(data_dir=data_dir, split="train", transform=get_transform(is_train=True))
-    val_dataset = RSNAPneumoniaDataset(data_dir=data_dir, split="val", transform=get_transform(is_train=False))
+    train_dataset = RSNAPneumoniaDataset(data_dir=data_dir, split="train", transform=train_transform)
+    val_dataset = RSNAPneumoniaDataset(data_dir=data_dir, split="val", transform=val_transform)
     
     def custom_collate(batch):
         images = torch.stack([item["image"] for item in batch])

@@ -1,0 +1,74 @@
+{
+    "train_patient_count": 21346,
+    "val_patient_count": 5338,
+    "train_positive": 4809,
+    "train_negative": 16537,
+    "pos_weight": 3.4387606571012683,
+    "image_size": 224,
+    "batch_size": 32,
+    "learning_rates": {
+        "stage1": 0.0001,
+        "stage2": 1e-05
+    },
+    "epochs": 5,
+    "best_epoch": 5,
+    "best_val_roc_auc": 0.8426954580497568,
+    "training_time_seconds": 638.3711423873901,
+    "history": [
+        {
+            "epoch": 1,
+            "train_loss": 0.9528106068244238,
+            "val_loss": 0.8846080913515149,
+            "val_roc_auc": 0.7913537397940056,
+            "val_pr_auc": 0.48952087862593313,
+            "val_recall": 0.7871986699916874,
+            "val_specificity": 0.664087061668682,
+            "val_f1": 0.535179429217293,
+            "val_accuracy": 0.6918321468714874
+        },
+        {
+            "epoch": 2,
+            "train_loss": 0.8599083483397604,
+            "val_loss": 0.8581572453418892,
+            "val_roc_auc": 0.8033739713593887,
+            "val_pr_auc": 0.5106648844133163,
+            "val_recall": 0.8270989193682461,
+            "val_specificity": 0.6328899637243047,
+            "val_f1": 0.5355220667384284,
+            "val_accuracy": 0.6766579243162233
+        },
+        {
+            "epoch": 3,
+            "train_loss": 0.8380494490711988,
+            "val_loss": 0.8409282183218859,
+            "val_roc_auc": 0.8089277009009117,
+            "val_pr_auc": 0.5200438525426597,
+            "val_recall": 0.8154613466334164,
+            "val_specificity": 0.6493349455864571,
+            "val_f1": 0.5399009356081453,
+            "val_accuracy": 0.6867740726863995
+        },
+        {
+            "epoch": 4,
+            "train_loss": 0.8002309995050916,
+            "val_loss": 0.7946331179784444,
+            "val_roc_auc": 0.8317295234304403,
+            "val_pr_auc": 0.5789844817750542,
+            "val_recall": 0.8395677472984207,
+            "val_specificity": 0.6655380894800483,
+            "val_f1": 0.5617352614015573,
+            "val_accuracy": 0.7047583364556014
+        },
+        {
+            "epoch": 5,
+            "train_loss": 0.7629162349297615,
+            "val_loss": 0.7660709915760748,
+            "val_roc_auc": 0.8426954580497568,
+            "val_pr_auc": 0.6123791175922162,
+            "val_recall": 0.828761429758936,
+            "val_specificity": 0.6955259975816203,
+            "val_f1": 0.5764671870482798,
+            "val_accuracy": 0.7255526414387411
+        }
+    ]
+}
