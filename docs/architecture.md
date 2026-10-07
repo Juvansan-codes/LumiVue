@@ -29,7 +29,7 @@ Image Preprocessing (OpenCV / Pillow / pydicom)
        │             │             │
        ▼             ▼             ▼
 ┌─────────────────────────────────────────┐
-│     MedGemma 1.5 4B Multimodal          │
+│     MedGemma 1.5 4B Server (vLLM)       │
 │     (Image + Clinical Context)          │
 └────────────────┬────────────────────────┘
                  ↓
@@ -45,6 +45,8 @@ Image Preprocessing (OpenCV / Pillow / pydicom)
 └────────────────┬────────────────────────┘
                  ↓
            API Response
+                 ↓
+           Frontend (Saves to Supabase)
                  ↓
            Doctor reviews
 ```
