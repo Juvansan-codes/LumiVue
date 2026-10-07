@@ -99,46 +99,6 @@ export default function HomePage() {
     setErrorMessage(null);
   }, []);
 
-  // Preset action helper
-  const handleLoadSample = useCallback((preset: "positive" | "negative") => {
-    if (preset === "positive") {
-      setPreviewUrl("/samples/cxr-sample-pneumonia.svg");
-      const file = new File(["sample"], "case_0492_radiograph_pa.dcm", {
-        type: "application/dicom",
-      });
-      setSelectedFile(file);
-      setPatientContext({
-        age: "64",
-        sex: "male",
-        spo2: "92%",
-        temperature: "38.6",
-        symptom_duration: "4 days",
-        symptoms: ["Fever", "Productive Cough", "Shortness of Breath"],
-        clinical_notes:
-          "64yo male presents with worsening productive cough with purulent sputum, chills, and fever. Decreased breath sounds at right lung base.",
-      });
-    } else {
-      setPreviewUrl("/samples/cxr-sample-normal.svg");
-      const file = new File(["sample_normal"], "case_0118_radiograph_pa.dcm", {
-        type: "application/dicom",
-      });
-      setSelectedFile(file);
-      setPatientContext({
-        age: "32",
-        sex: "female",
-        spo2: "99%",
-        temperature: "36.8",
-        symptom_duration: "",
-        symptoms: [],
-        clinical_notes:
-          "Routine pre-operative pulmonary assessment. Patient asymptomatic, clear bilateral lung fields on physical examination.",
-      });
-    }
-    setAppState("idle");
-    setAnalysisResult(null);
-    setErrorMessage(null);
-  }, []);
-
   // Reset entire analysis workspace
   const handleResetWorkspace = useCallback(() => {
     setSelectedFile(null);
@@ -365,7 +325,6 @@ export default function HomePage() {
                   selectedFile={selectedFile}
                   onClear={handleClear}
                   previewUrl={previewUrl}
-                  onLoadPreset={handleLoadSample}
                 />
 
                 <div
@@ -414,7 +373,7 @@ export default function HomePage() {
                       )}
                     </div>
 
-                    <EmptyState onLoadSample={handleLoadSample} />
+                    <EmptyState />
                   </>
                 )}
 
