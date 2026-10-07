@@ -97,13 +97,16 @@ class MedGemmaModel:
             torch_dtype = torch.bfloat16 if device == "cuda" else torch.float32
 
             logger.info("Loading processor …")
-            self._processor = AutoProcessor.from_pretrained(MODEL_ID)
+            self._processor = AutoProcessor.from_pretrained(
+                MODEL_ID, local_files_only=True
+            )
 
             logger.info("Loading model weights (dtype=%s) …", torch_dtype)
             self._model = AutoModelForImageTextToText.from_pretrained(
                 MODEL_ID,
-                torch_dtype=torch_dtype,
+                dtype=torch_dtype,           # replaces deprecated torch_dtype
                 device_map="auto" if device == "cuda" else None,
+                local_files_only=True,       # never attempt to reach HuggingFace Hub
             )
 
             if device != "cuda":
