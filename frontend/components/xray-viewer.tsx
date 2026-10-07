@@ -214,7 +214,7 @@ export function XrayViewer({
                 height: `${((bbox[3] - bbox[1]) / (imageDimensions.h || 1024)) * 100}%`,
                 border: "2px solid var(--lv-blue-bright)",
                 borderRadius: "4px",
-                boxShadow: "0 0 8px rgba(59, 130, 246, 0.3)",
+                boxShadow: "0 0 8px rgba(249, 115, 22, 0.4)",
               }}
             >
               <span

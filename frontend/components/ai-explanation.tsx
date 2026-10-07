@@ -51,7 +51,7 @@ export function AiExplanation({ explanation }: AiExplanationProps) {
           color: "var(--lv-black)",
         }}
       >
-        <p className="font-normal selection:bg-blue-100">
+        <p className="font-normal selection:bg-orange-100">
           {explanation}
         </p>
       </div>

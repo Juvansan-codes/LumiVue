@@ -574,7 +574,7 @@ export default function HomePage() {
                   <button
                     type="button"
                     onClick={() => setActiveTab("analysis")}
-                    className="font-semibold text-blue-600 hover:underline"
+                    className="font-semibold text-orange-600 hover:underline"
                   >
                     View in Workstation &rarr;
                   </button>

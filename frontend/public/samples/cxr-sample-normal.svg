@@ -121,7 +121,7 @@
   <!-- Technical Annotations -->
   <text x="40" y="60" fill="#ffffff" opacity="0.5" font-family="monospace" font-size="20" font-weight="600">PA CHEST ERECT</text>
   <text x="40" y="90" fill="#ffffff" opacity="0.35" font-family="monospace" font-size="14">KV: 125 | mAs: 3.2</text>
-  <text x="960" y="60" fill="#2563FF" opacity="0.8" font-family="monospace" font-size="24" font-weight="bold" text-anchor="end">R</text>
+  <text x="960" y="60" fill="#F97316" opacity="0.8" font-family="monospace" font-size="24" font-weight="bold" text-anchor="end">R</text>
   <text x="960" y="990" fill="#ffffff" opacity="0.3" font-family="monospace" font-size="14" text-anchor="end">LumiVue Reference Baseline</text>
   <text x="40" y="990" fill="#ffffff" opacity="0.3" font-family="monospace" font-size="14">DICOM UID: 1.2.840.113619.2.89</text>
 </svg>

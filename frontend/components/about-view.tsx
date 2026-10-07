@@ -28,8 +28,8 @@ export function AboutView({ onNavigateToAnalysis }: AboutViewProps) {
         }}
       >
         <div className="relative z-10 max-w-3xl space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold tracking-wide border bg-white/90 text-blue-700 border-blue-200 shadow-xs">
-            <Sparkles className="h-3.5 w-3.5 text-blue-600" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold tracking-wide border bg-white/90 text-orange-700 border-orange-200 shadow-xs">
+            <Sparkles className="h-3.5 w-3.5 text-orange-600" />
             <span>HNX26PSI05 &bull; Multimodal Medical Image Intelligence</span>
           </div>
 
@@ -64,7 +64,7 @@ export function AboutView({ onNavigateToAnalysis }: AboutViewProps) {
 
         {/* Ambient subtle decorative circle */}
         <div
-          className="absolute -right-16 -top-16 w-80 h-80 rounded-full bg-blue-100/50 pointer-events-none blur-3xl"
+          className="absolute -right-16 -top-16 w-80 h-80 rounded-full bg-orange-100/50 pointer-events-none blur-3xl"
           aria-hidden="true"
         />
       </section>
@@ -76,7 +76,7 @@ export function AboutView({ onNavigateToAnalysis }: AboutViewProps) {
           style={{ borderColor: "var(--lv-border)" }}
         >
           <div
-            className="flex items-center justify-center h-10 w-10 rounded-lg text-blue-600"
+            className="flex items-center justify-center h-10 w-10 rounded-lg text-orange-600"
             style={{ background: "var(--lv-blue-light)" }}
           >
             <Lock className="h-5 w-5" />
@@ -134,7 +134,7 @@ export function AboutView({ onNavigateToAnalysis }: AboutViewProps) {
         <div className="flex items-center justify-between border-b pb-4" style={{ borderColor: "var(--lv-border-light)" }}>
           <div className="flex items-center gap-3">
             <div
-              className="flex items-center justify-center h-9 w-9 rounded-lg text-blue-600"
+              className="flex items-center justify-center h-9 w-9 rounded-lg text-orange-600"
               style={{ background: "var(--lv-blue-light)" }}
             >
               <Workflow className="h-5 w-5" />
@@ -155,7 +155,7 @@ export function AboutView({ onNavigateToAnalysis }: AboutViewProps) {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="p-4 rounded-xl border bg-neutral-50/60 border-neutral-200/80 space-y-2">
-            <div className="text-[11px] font-mono font-bold text-blue-600">STEP 01</div>
+            <div className="text-[11px] font-mono font-bold text-orange-600">STEP 01</div>
             <h3 className="text-xs font-semibold text-neutral-900">Pre-check & Quality</h3>
             <p className="text-[12px] text-neutral-600 leading-relaxed">
               Assesses exposure, blur index, contrast, and anatomical centering before running deep networks.
@@ -163,7 +163,7 @@ export function AboutView({ onNavigateToAnalysis }: AboutViewProps) {
           </div>
 
           <div className="p-4 rounded-xl border bg-neutral-50/60 border-neutral-200/80 space-y-2">
-            <div className="text-[11px] font-mono font-bold text-blue-600">STEP 02</div>
+            <div className="text-[11px] font-mono font-bold text-orange-600">STEP 02</div>
             <h3 className="text-xs font-semibold text-neutral-900">DenseNet-121 & Heatmap</h3>
             <p className="text-[12px] text-neutral-600 leading-relaxed">
               Extracts spatial activations and computes Grad-CAM heatmaps with focal bounding boxes.
@@ -171,7 +171,7 @@ export function AboutView({ onNavigateToAnalysis }: AboutViewProps) {
           </div>
 
           <div className="p-4 rounded-xl border bg-neutral-50/60 border-neutral-200/80 space-y-2">
-            <div className="text-[11px] font-mono font-bold text-blue-600">STEP 03</div>
+            <div className="text-[11px] font-mono font-bold text-orange-600">STEP 03</div>
             <h3 className="text-xs font-semibold text-neutral-900">Multimodal Alignment</h3>
             <p className="text-[12px] text-neutral-600 leading-relaxed">
               MedGemma 1.5 4B reasons over radiological features together with vital signs and symptom chronology.
@@ -179,7 +179,7 @@ export function AboutView({ onNavigateToAnalysis }: AboutViewProps) {
           </div>
 
           <div className="p-4 rounded-xl border bg-neutral-50/60 border-neutral-200/80 space-y-2">
-            <div className="text-[11px] font-mono font-bold text-blue-600">STEP 04</div>
+            <div className="text-[11px] font-mono font-bold text-orange-600">STEP 04</div>
             <h3 className="text-xs font-semibold text-neutral-900">Firewall & Output</h3>
             <p className="text-[12px] text-neutral-600 leading-relaxed">
               Applies safety gates, computes confidence factors, and generates structured clinical findings.
@@ -196,7 +196,7 @@ export function AboutView({ onNavigateToAnalysis }: AboutViewProps) {
           style={{ borderColor: "var(--lv-border)", boxShadow: "var(--lv-shadow-sm)" }}
         >
           <div className="flex items-center gap-2.5">
-            <Cpu className="h-5 w-5 text-blue-600" />
+            <Cpu className="h-5 w-5 text-orange-600" />
             <h2 className="text-sm font-semibold text-neutral-900">
               System Specifications
             </h2>

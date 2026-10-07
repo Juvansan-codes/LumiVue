@@ -56,7 +56,7 @@ export function EmptyState({ onLoadSample }: EmptyStateProps) {
             <button
               type="button"
               onClick={() => onLoadSample("positive")}
-              className="flex items-center justify-between px-3.5 py-2.5 rounded-lg border text-xs font-medium text-left transition-all duration-150 hover:border-blue-400 hover:bg-blue-50/50"
+              className="flex items-center justify-between px-3.5 py-2.5 rounded-lg border text-xs font-medium text-left transition-all duration-150 hover:border-orange-400 hover:bg-orange-50/50"
               style={{
                 borderColor: "var(--lv-border)",
                 background: "var(--lv-surface-raised)",
@@ -67,13 +67,13 @@ export function EmptyState({ onLoadSample }: EmptyStateProps) {
                 <p className="font-semibold text-neutral-900">Case 1: Suspected Infiltrate</p>
                 <p className="text-[10px] text-neutral-500">Fever, cough, SpO₂ 92%</p>
               </div>
-              <ArrowUpRight className="h-3.5 w-3.5 text-blue-600 shrink-0 ml-1" />
+              <ArrowUpRight className="h-3.5 w-3.5 text-orange-600 shrink-0 ml-1" />
             </button>
 
             <button
               type="button"
               onClick={() => onLoadSample("negative")}
-              className="flex items-center justify-between px-3.5 py-2.5 rounded-lg border text-xs font-medium text-left transition-all duration-150 hover:border-blue-400 hover:bg-blue-50/50"
+              className="flex items-center justify-between px-3.5 py-2.5 rounded-lg border text-xs font-medium text-left transition-all duration-150 hover:border-orange-400 hover:bg-orange-50/50"
               style={{
                 borderColor: "var(--lv-border)",
                 background: "var(--lv-surface-raised)",
@@ -84,7 +84,7 @@ export function EmptyState({ onLoadSample }: EmptyStateProps) {
                 <p className="font-semibold text-neutral-900">Case 2: Clear Lungs</p>
                 <p className="text-[10px] text-neutral-500">Routine pre-op assessment</p>
               </div>
-              <ArrowUpRight className="h-3.5 w-3.5 text-blue-600 shrink-0 ml-1" />
+              <ArrowUpRight className="h-3.5 w-3.5 text-orange-600 shrink-0 ml-1" />
             </button>
           </div>
         </div>
@@ -95,7 +95,7 @@ export function EmptyState({ onLoadSample }: EmptyStateProps) {
         className="mt-6 flex items-center gap-1.5 text-[11px]"
         style={{ color: "var(--lv-muted-light)" }}
       >
-        <Shield className="h-3.5 w-3.5 text-blue-600" />
+        <Shield className="h-3.5 w-3.5 text-orange-600" />
         <span>Multimodal verification with Evidence Firewall active</span>
       </div>
     </div>

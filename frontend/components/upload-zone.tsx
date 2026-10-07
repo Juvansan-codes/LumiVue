@@ -199,7 +199,7 @@ export function UploadZone({
                     e.stopPropagation();
                     onLoadPreset("positive");
                   }}
-                  className="px-2.5 py-1 rounded text-[11px] font-medium border bg-white text-neutral-700 hover:border-blue-400 hover:text-blue-600 transition-colors"
+                  className="px-2.5 py-1 rounded text-[11px] font-medium border bg-white text-neutral-700 hover:border-orange-400 hover:text-orange-600 transition-colors"
                   style={{ borderColor: "var(--lv-border)" }}
                 >
                   Suspected Case
@@ -210,7 +210,7 @@ export function UploadZone({
                     e.stopPropagation();
                     onLoadPreset("negative");
                   }}
-                  className="px-2.5 py-1 rounded text-[11px] font-medium border bg-white text-neutral-700 hover:border-blue-400 hover:text-blue-600 transition-colors"
+                  className="px-2.5 py-1 rounded text-[11px] font-medium border bg-white text-neutral-700 hover:border-orange-400 hover:text-orange-600 transition-colors"
                   style={{ borderColor: "var(--lv-border)" }}
                 >
                   Normal Case

@@ -15,12 +15,25 @@
   --lv-border: #E5E7EB;
   --lv-border-light: #F3F4F6;
 
-  /* --- Neo Blue --- */
-  --lv-blue: #2563FF;
-  --lv-blue-bright: #3B82F6;
-  --lv-blue-hover: #1D4FE6;
-  --lv-blue-light: #EFF6FF;
-  --lv-blue-muted: #DBEAFE;
+  /* --- Mandarin Orange (Accent Palette) --- */
+  --lv-orange: #F97316;
+  --lv-orange-bright: #FB923C;
+  --lv-orange-hover: #EA580C;
+  --lv-orange-light: #FFF7ED;
+  --lv-orange-muted: #FED7AA;
+
+  /* Aliases to ensure backward-compatibility across all component styles */
+  --lv-accent: #F97316;
+  --lv-accent-bright: #FB923C;
+  --lv-accent-hover: #EA580C;
+  --lv-accent-light: #FFF7ED;
+  --lv-accent-muted: #FED7AA;
+
+  --lv-blue: #F97316;
+  --lv-blue-bright: #FB923C;
+  --lv-blue-hover: #EA580C;
+  --lv-blue-light: #FFF7ED;
+  --lv-blue-muted: #FED7AA;
 
   /* --- Semantic --- */
   --lv-success: #16A34A;
@@ -49,7 +62,8 @@
   --lv-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
   --lv-shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06);
   --lv-shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.08);
-  --lv-shadow-blue: 0 2px 12px rgba(37, 99, 255, 0.15);
+  --lv-shadow-blue: 0 2px 14px rgba(249, 115, 22, 0.22);
+  --lv-shadow-orange: 0 2px 14px rgba(249, 115, 22, 0.22);
 
   /* --- Transitions --- */
   --lv-transition-fast: 150ms ease;

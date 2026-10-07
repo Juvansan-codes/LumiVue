@@ -112,7 +112,7 @@ export function Sidebar({ activeTab, onTabChange, className = "" }: SidebarProps
               onClick={() => onTabChange(item.id)}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all group relative ${
                 isActive
-                  ? "bg-blue-50/80 text-blue-600 font-semibold"
+                  ? "bg-orange-50/80 text-orange-600 font-semibold"
                   : "text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 font-medium"
               }`}
               title={collapsed ? item.label : undefined}
@@ -120,7 +120,7 @@ export function Sidebar({ activeTab, onTabChange, className = "" }: SidebarProps
               {/* Active Indicator Bar */}
               {isActive && (
                 <span
-                  className="absolute left-0 top-2 bottom-2 w-1 rounded-r-md bg-blue-600"
+                  className="absolute left-0 top-2 bottom-2 w-1 rounded-r-md bg-orange-500"
                   aria-hidden="true"
                 />
               )}
@@ -128,7 +128,7 @@ export function Sidebar({ activeTab, onTabChange, className = "" }: SidebarProps
               <Icon
                 className={`h-5 w-5 shrink-0 transition-colors ${
                   isActive
-                    ? "text-blue-600"
+                    ? "text-orange-600"
                     : "text-neutral-400 group-hover:text-neutral-600"
                 }`}
               />
@@ -143,7 +143,7 @@ export function Sidebar({ activeTab, onTabChange, className = "" }: SidebarProps
               )}
 
               {!collapsed && isActive && (
-                <ChevronRight className="h-3.5 w-3.5 text-blue-500 shrink-0 ml-auto" />
+                <ChevronRight className="h-3.5 w-3.5 text-orange-500 shrink-0 ml-auto" />
               )}
             </button>
           );

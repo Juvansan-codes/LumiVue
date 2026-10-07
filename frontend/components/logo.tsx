@@ -17,20 +17,20 @@ export function Logo({ className = "" }: { className?: string }) {
         className="shrink-0"
       >
         {/* Abstract L shape with vision/scanning motif */}
-        <rect x="4" y="4" width="6" height="24" rx="2" fill="#2563FF" />
-        <rect x="4" y="22" width="20" height="6" rx="2" fill="#2563FF" />
+        <rect x="4" y="4" width="6" height="24" rx="2" fill="#F97316" />
+        <rect x="4" y="22" width="20" height="6" rx="2" fill="#F97316" />
         {/* Vision/scan circle — represents imaging */}
         <circle
           cx="22"
           cy="12"
           r="6"
-          stroke="#2563FF"
+          stroke="#F97316"
           strokeWidth="2"
           fill="none"
           opacity="0.6"
         />
         {/* Center dot — focal point */}
-        <circle cx="22" cy="12" r="2" fill="#2563FF" opacity="0.8" />
+        <circle cx="22" cy="12" r="2" fill="#F97316" opacity="0.8" />
       </svg>
       <div className="flex flex-col">
         <span
