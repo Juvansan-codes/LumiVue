@@ -26,6 +26,10 @@ interface AuthContextValue {
     token: string,
     type?: "signup" | "email",
   ) => Promise<{ error: AuthError | null }>;
+  verifyTokenHash: (
+    tokenHash: string,
+    type?: "signup" | "email",
+  ) => Promise<{ error: AuthError | null }>;
   resendOtp: (
     email: string,
     type?: "signup",
@@ -112,6 +116,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [supabase],
   );
 
+  const verifyTokenHash = useCallback(
+    async (
+      tokenHash: string,
+      type: "signup" | "email" = "signup",
+    ) => {
+      const { data, error } = await supabase.auth.verifyOtp({
+        token_hash: tokenHash,
+        type,
+      });
+      if (!error && data.session) {
+        setSession(data.session);
+        setUser(data.user);
+      }
+      return { error };
+    },
+    [supabase],
+  );
+
   const resendOtp = useCallback(
     async (email: string, type: "signup" = "signup") => {
       const { error } = await supabase.auth.resend({
@@ -133,6 +155,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signIn,
         signOut,
         verifyOtp,
+        verifyTokenHash,
         resendOtp,
       }}
     >

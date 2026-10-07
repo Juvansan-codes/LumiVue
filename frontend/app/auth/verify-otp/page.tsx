@@ -30,8 +30,10 @@ function VerifyOtpContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const emailParam = searchParams.get("email") || "";
+  const tokenHashParam = searchParams.get("token_hash");
+  const typeParam = searchParams.get("type") as "signup" | "email" | null;
 
-  const { verifyOtp, resendOtp, user } = useAuth();
+  const { verifyOtp, verifyTokenHash, resendOtp, user } = useAuth();
 
   const [email, setEmail] = useState(emailParam);
   const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
@@ -50,6 +52,25 @@ function VerifyOtpContent() {
       router.push("/");
     }
   }, [user, isVerified, router]);
+
+  // Handle direct link verification via token_hash (from Supabase confirmation emails)
+  useEffect(() => {
+    if (tokenHashParam && !isVerified) {
+      setLoading(true);
+      verifyTokenHash(tokenHashParam, typeParam || "signup").then(({ error: tokenErr }) => {
+        setLoading(false);
+        if (tokenErr) {
+          setError(tokenErr.message || "Invalid or expired confirmation link.");
+        } else {
+          setIsVerified(true);
+          setSuccess("Email successfully confirmed! Redirecting to workstation...");
+          setTimeout(() => {
+            router.push("/");
+          }, 1200);
+        }
+      });
+    }
+  }, [tokenHashParam, typeParam, verifyTokenHash, isVerified, router]);
 
   // Focus the first input on initial mount
   useEffect(() => {
