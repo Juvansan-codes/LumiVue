@@ -72,13 +72,20 @@ class PneumoniaModel(nn.Module):
             raise FileNotFoundError(f"Checkpoint not found at {path}")
             
         logger.info(f"Loading checkpoint from {path}")
-        state_dict = torch.load(path, map_location=self.device)
+        state_dict = torch.load(path, map_location=self.device, weights_only=True)
         
         # Handle DataParallel wrapped dicts if necessary
         if "state_dict" in state_dict:
             state_dict = state_dict["state_dict"]
-            
-        self.load_state_dict(state_dict)
+        
+        # Determine if checkpoint was saved from model.backbone (no 'backbone.' prefix)
+        # or from the full PneumoniaModel wrapper (has 'backbone.' prefix)
+        sample_key = next(iter(state_dict.keys()))
+        if sample_key.startswith("backbone."):
+            self.load_state_dict(state_dict)
+        else:
+            # Checkpoint was saved via model.backbone.state_dict()
+            self.backbone.load_state_dict(state_dict)
         self.eval()
 
     def predict(self, image_tensor: torch.Tensor) -> PredictionResult:
