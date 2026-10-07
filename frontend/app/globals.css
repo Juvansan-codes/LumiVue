@@ -751,3 +751,113 @@ body {
   color: var(--lv-muted);
   font-weight: 500;
 }
+
+/* ============================================================================
+   OTP Verification Styles
+   ============================================================================ */
+
+.auth-otp-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: rgba(249, 115, 22, 0.08);
+  border: 1px solid rgba(249, 115, 22, 0.2);
+  border-radius: var(--lv-radius-full);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--lv-orange-hover);
+  margin-bottom: 12px;
+}
+
+.auth-otp-email-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--lv-surface-raised);
+  border: 1px solid var(--lv-border);
+  border-radius: var(--lv-radius-sm);
+  margin-bottom: 18px;
+}
+
+.auth-otp-email-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--lv-black);
+  word-break: break-all;
+}
+
+.auth-otp-inputs {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 10px 0 16px;
+}
+
+.auth-otp-box {
+  width: 46px;
+  height: 52px;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 700;
+  font-family: var(--lv-font-mono, monospace);
+  color: var(--lv-black);
+  background: var(--lv-surface-raised);
+  border: 1.5px solid var(--lv-border);
+  border-radius: var(--lv-radius-sm);
+  outline: none;
+  transition:
+    border-color var(--lv-transition-fast),
+    box-shadow var(--lv-transition-fast),
+    background var(--lv-transition-fast),
+    transform var(--lv-transition-fast);
+}
+
+.auth-otp-box:focus {
+  border-color: var(--lv-orange);
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.12);
+  transform: translateY(-1px);
+}
+
+.auth-otp-box--filled {
+  border-color: #fdba74;
+  background: #fffaf5;
+}
+
+.auth-otp-resend {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  margin-top: 14px;
+}
+
+.auth-otp-resend-btn {
+  background: none;
+  border: none;
+  font-family: var(--lv-font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--lv-orange);
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: color var(--lv-transition-fast);
+}
+
+.auth-otp-resend-btn:hover:not(:disabled) {
+  color: var(--lv-orange-hover);
+  text-decoration: underline;
+}
+
+.auth-otp-resend-btn:disabled {
+  color: var(--lv-muted-light);
+  cursor: not-allowed;
+  text-decoration: none;
+}
+

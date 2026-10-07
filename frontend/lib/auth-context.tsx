@@ -21,6 +21,15 @@ interface AuthContextValue {
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: AuthError | null }>;
   signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<void>;
+  verifyOtp: (
+    email: string,
+    token: string,
+    type?: "signup" | "email",
+  ) => Promise<{ error: AuthError | null }>;
+  resendOtp: (
+    email: string,
+    type?: "signup",
+  ) => Promise<{ error: AuthError | null }>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -83,9 +92,49 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut();
   }, [supabase]);
 
+  const verifyOtp = useCallback(
+    async (
+      email: string,
+      token: string,
+      type: "signup" | "email" = "signup",
+    ) => {
+      const { data, error } = await supabase.auth.verifyOtp({
+        email,
+        token,
+        type,
+      });
+      if (!error && data.session) {
+        setSession(data.session);
+        setUser(data.user);
+      }
+      return { error };
+    },
+    [supabase],
+  );
+
+  const resendOtp = useCallback(
+    async (email: string, type: "signup" = "signup") => {
+      const { error } = await supabase.auth.resend({
+        email,
+        type,
+      });
+      return { error };
+    },
+    [supabase],
+  );
+
   return (
     <AuthContext.Provider
-      value={{ user, session, loading, signUp, signIn, signOut }}
+      value={{
+        user,
+        session,
+        loading,
+        signUp,
+        signIn,
+        signOut,
+        verifyOtp,
+        resendOtp,
+      }}
     >
       {children}
     </AuthContext.Provider>

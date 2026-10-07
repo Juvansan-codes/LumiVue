@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useCallback, type FormEvent } from "react";
+import { useState, useCallback, useEffect, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { Logo } from "@/components/logo";
 import {
@@ -14,12 +16,14 @@ import {
   EyeOff,
   ShieldCheck,
   Sparkles,
+  KeyRound,
 } from "lucide-react";
 
 type AuthMode = "sign-in" | "sign-up";
 
 export default function AuthPage() {
-  const { signIn, signUp } = useAuth();
+  const router = useRouter();
+  const { signIn, signUp, user } = useAuth();
   const [mode, setMode] = useState<AuthMode>("sign-in");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,6 +32,13 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  // If already logged in, redirect to workstation
+  useEffect(() => {
+    if (user) {
+      router.push("/");
+    }
+  }, [user, router]);
 
   const handleSubmit = useCallback(
     async (e: FormEvent) => {
@@ -45,22 +56,20 @@ export default function AuthPage() {
         const { error: signUpErr } = await signUp(email, password, fullName);
         if (signUpErr) {
           setError(signUpErr.message);
+          setLoading(false);
         } else {
-          setSuccess(
-            "Account created! Check your email for a confirmation link.",
-          );
-          setMode("sign-in");
+          // Immediately redirect to the OTP confirmation page
+          router.push(`/auth/verify-otp?email=${encodeURIComponent(email)}`);
         }
       } else {
         const { error: signInErr } = await signIn(email, password);
         if (signInErr) {
           setError(signInErr.message);
         }
-        // On success, the auth context listener redirects automatically
+        setLoading(false);
       }
-      setLoading(false);
     },
-    [mode, email, password, fullName, signIn, signUp],
+    [mode, email, password, fullName, signIn, signUp, router],
   );
 
   const toggleMode = useCallback(() => {
@@ -261,6 +270,16 @@ export default function AuthPage() {
                 {mode === "sign-in" ? "Sign Up" : "Sign In"}
               </button>
             </p>
+
+            <div className="mt-4 pt-3 border-t text-center" style={{ borderColor: "var(--lv-border-light)" }}>
+              <Link
+                href={`/auth/verify-otp${email ? `?email=${encodeURIComponent(email)}` : ""}`}
+                className="inline-flex items-center gap-1.5 text-xs text-neutral-500 hover:text-orange-600 transition-colors font-medium"
+              >
+                <KeyRound className="h-3.5 w-3.5 text-orange-600" />
+                <span>Have a confirmation code? Verify OTP</span>
+              </Link>
+            </div>
           </div>
         </div>
       </div>
