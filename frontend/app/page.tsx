@@ -8,7 +8,7 @@ import type {
   PipelineStep,
 } from "@/lib/types";
 import { analyzeXray } from "@/lib/api";
-import { mockPipelineSteps, mockNegativeResponse, mockAnalysisResponse } from "@/lib/mock-data";
+import { mockPipelineSteps, mockNegativeResponse } from "@/lib/mock-data";
 import { XrayViewer } from "@/components/xray-viewer";
 import { UploadZone } from "@/components/upload-zone";
 import { PatientContextForm } from "@/components/patient-context-form";
@@ -21,13 +21,16 @@ import { EvidencePanel } from "@/components/evidence-panel";
 import { SafetyDisclaimer } from "@/components/safety-disclaimer";
 import { EmptyState } from "@/components/empty-state";
 import { ErrorState } from "@/components/error-state";
+import { Sidebar, type ActiveTab } from "@/components/sidebar";
+import { AboutView } from "@/components/about-view";
 import {
   RotateCcw,
   FileDown,
   Activity,
-  Layers,
   Sparkles,
   Info,
+  Clock,
+  ArrowRight,
 } from "lucide-react";
 
 const initialPatientContext: PatientContext = {
@@ -41,7 +44,8 @@ const initialPatientContext: PatientContext = {
 };
 
 export default function HomePage() {
-  // Application State
+  // Navigation State: 'about' is the main content page by default
+  const [activeTab, setActiveTab] = useState<ActiveTab>("about");
   const [appState, setAppState] = useState<AppState>("idle");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -210,86 +214,144 @@ export default function HomePage() {
   }, [analysisResult, patientContext]);
 
   return (
-    <div className="min-h-[calc(100vh-68px)] bg-neutral-50/60 pb-16">
-      {/* Subheader / Workstation Context Bar */}
-      <header
-        className="border-b bg-white px-6 lg:px-8 py-3.5 sticky top-[68px] z-40 transition-colors"
-        style={{ borderColor: "var(--lv-border)" }}
-      >
-        <div className="mx-auto flex max-w-7xl items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div
-              className="flex items-center justify-center h-8 w-8 rounded-lg"
-              style={{ background: "var(--lv-blue-light)" }}
-            >
-              <Activity
-                className="h-4 w-4"
-                style={{ color: "var(--lv-blue)" }}
-                aria-hidden="true"
-              />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1
-                  className="text-sm font-semibold tracking-tight"
-                  style={{ color: "var(--lv-black)" }}
-                >
-                  Chest Radiograph Pneumonia Assessment
-                </h1>
-                <span
-                  className="text-[10px] font-mono px-2 py-0.5 rounded border"
-                  style={{
-                    background: "var(--lv-surface-raised)",
-                    borderColor: "var(--lv-border)",
-                    color: "var(--lv-muted)",
-                  }}
-                >
-                  PA View &bull; Multimodal
-                </span>
+    <div className="flex h-screen w-full bg-neutral-50/60 overflow-hidden">
+      {/* 1. Left Sidebar Navigation (Replaces top navbar, removes Model tab) */}
+      <Sidebar
+        activeTab={activeTab}
+        onTabChange={(tab) => setActiveTab(tab)}
+      />
+
+      {/* 2. Main Content Area */}
+      <div className="flex-1 flex flex-col h-full min-w-0 overflow-y-auto">
+        {/* Top Header / Context Bar */}
+        <header
+          className="border-b bg-white px-6 lg:px-8 py-3.5 sticky top-0 z-20 shrink-0"
+          style={{ borderColor: "var(--lv-border)" }}
+        >
+          <div className="mx-auto flex max-w-7xl items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div
+                className="flex items-center justify-center h-8 w-8 rounded-lg"
+                style={{ background: "var(--lv-blue-light)" }}
+              >
+                {activeTab === "about" ? (
+                  <Info
+                    className="h-4 w-4"
+                    style={{ color: "var(--lv-blue)" }}
+                    aria-hidden="true"
+                  />
+                ) : activeTab === "history" ? (
+                  <Clock
+                    className="h-4 w-4"
+                    style={{ color: "var(--lv-blue)" }}
+                    aria-hidden="true"
+                  />
+                ) : (
+                  <Activity
+                    className="h-4 w-4"
+                    style={{ color: "var(--lv-blue)" }}
+                    aria-hidden="true"
+                  />
+                )}
               </div>
-              <p
-                className="text-[11px]"
-                style={{ color: "var(--lv-muted)" }}
-              >
-                Evidence-grounded second-opinion assistance with automated Evidence Firewall verification
-              </p>
+
+              <div>
+                <div className="flex items-center gap-2">
+                  <h1
+                    className="text-sm font-semibold tracking-tight"
+                    style={{ color: "var(--lv-black)" }}
+                  >
+                    {activeTab === "about"
+                      ? "About LumiVue & System Architecture"
+                      : activeTab === "history"
+                      ? "Case History & Past Diagnostic Records"
+                      : "Chest Radiograph Pneumonia Assessment"}
+                  </h1>
+                  <span
+                    className="text-[10px] font-mono px-2 py-0.5 rounded border"
+                    style={{
+                      background: "var(--lv-surface-raised)",
+                      borderColor: "var(--lv-border)",
+                      color: "var(--lv-muted)",
+                    }}
+                  >
+                    {activeTab === "about"
+                      ? "Evidence-Grounded"
+                      : activeTab === "history"
+                      ? "Encrypted Logs"
+                      : "PA View • Multimodal"}
+                  </span>
+                </div>
+                <p
+                  className="text-[11px]"
+                  style={{ color: "var(--lv-muted)" }}
+                >
+                  {activeTab === "about"
+                    ? "Clinical decision-support overview, multimodal pipeline design, and Evidence Firewall guarantees"
+                    : activeTab === "history"
+                    ? "Review audited case evaluations, heatmaps, and past physician sign-offs"
+                    : "Evidence-grounded second-opinion assistance with automated Evidence Firewall verification"}
+                </p>
+              </div>
+            </div>
+
+            {/* Quick Header Actions */}
+            <div className="flex items-center gap-2.5">
+              {activeTab === "about" && (
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("analysis")}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white shadow-xs transition-colors hover:opacity-95"
+                  style={{ background: "var(--lv-blue)" }}
+                >
+                  <span>Launch Diagnostic Analysis</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </button>
+              )}
+
+              {activeTab === "analysis" && (
+                <>
+                  {appState === "complete" && (
+                    <button
+                      type="button"
+                      onClick={handleExportReport}
+                      className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium text-neutral-700 bg-white hover:bg-neutral-50 transition-colors"
+                      style={{ borderColor: "var(--lv-border)" }}
+                      aria-label="Export structured JSON report"
+                    >
+                      <FileDown className="h-3.5 w-3.5 text-neutral-500" />
+                      <span>Export Report</span>
+                    </button>
+                  )}
+
+                  {(previewUrl || appState !== "idle") && (
+                    <button
+                      type="button"
+                      onClick={handleResetWorkspace}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium text-neutral-600 bg-white hover:text-neutral-900 hover:bg-neutral-50 transition-colors"
+                      style={{ borderColor: "var(--lv-border)" }}
+                      aria-label="Reset workstation"
+                    >
+                      <RotateCcw className="h-3.5 w-3.5" />
+                      <span>Reset View</span>
+                    </button>
+                  )}
+                </>
+              )}
             </div>
           </div>
+        </header>
 
-          {/* Action buttons on header */}
-          <div className="flex items-center gap-2.5">
-            {appState === "complete" && (
-              <button
-                type="button"
-                onClick={handleExportReport}
-                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium text-neutral-700 bg-white hover:bg-neutral-50 transition-colors"
-                style={{ borderColor: "var(--lv-border)" }}
-                aria-label="Export structured JSON report"
-              >
-                <FileDown className="h-3.5 w-3.5 text-neutral-500" />
-                <span>Export Report</span>
-              </button>
-            )}
+        {/* Main Workstation Layout */}
+        <main className="flex-1 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+          {/* VIEW A: ABOUT PAGE (Default Main Content Page) */}
+          {activeTab === "about" && (
+            <AboutView onNavigateToAnalysis={() => setActiveTab("analysis")} />
+          )}
 
-            {(previewUrl || appState !== "idle") && (
-              <button
-                type="button"
-                onClick={handleResetWorkspace}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium text-neutral-600 bg-white hover:text-neutral-900 hover:bg-neutral-50 transition-colors"
-                style={{ borderColor: "var(--lv-border)" }}
-                aria-label="Reset workstation"
-              >
-                <RotateCcw className="h-3.5 w-3.5" />
-                <span>Reset View</span>
-              </button>
-            )}
-          </div>
-        </div>
-      </header>
-
-      {/* Main Workstation Layout */}
-      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-6">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          {/* VIEW B: DIAGNOSTIC ANALYSIS WORKSTATION */}
+          {activeTab === "analysis" && (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start pb-12">
           
           {/* ============================================================ */}
           {/* LEFT COLUMN: Radiological Imaging & Diagnostic Viewer (7 cols) */}
@@ -454,7 +516,96 @@ export default function HomePage() {
           </section>
 
         </div>
+      )}
+
+        {/* VIEW C: CASE HISTORY */}
+        {activeTab === "history" && (
+          <div className="max-w-4xl mx-auto space-y-6 pb-12 animate-in fade-in duration-300">
+            <div
+              className="rounded-xl border bg-white p-6 flex items-center justify-between"
+              style={{ borderColor: "var(--lv-border)" }}
+            >
+              <div>
+                <h2 className="text-base font-semibold text-neutral-900">
+                  Diagnostic Session Records
+                </h2>
+                <p className="text-xs text-neutral-500 mt-0.5">
+                  Past chest radiograph evaluations and structured findings in this session
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setActiveTab("analysis")}
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-white transition-all shadow-xs"
+                style={{ background: "var(--lv-blue)" }}
+              >
+                Start New Analysis
+              </button>
+            </div>
+
+            {analysisResult ? (
+              <div
+                className="rounded-xl border bg-white p-5 space-y-3"
+                style={{ borderColor: "var(--lv-border)" }}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-mono text-neutral-500">
+                    Case #{analysisResult.analysis_id.slice(0, 8)}
+                  </span>
+                  <span
+                    className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
+                      analysisResult.finding === "suspected_pneumonia"
+                        ? "bg-red-50 text-red-700 border border-red-200"
+                        : "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                    }`}
+                  >
+                    {analysisResult.finding === "suspected_pneumonia"
+                      ? "Suspected Pneumonia"
+                      : analysisResult.finding === "no_pneumonia_detected"
+                      ? "No Pneumonia Detected"
+                      : analysisResult.finding}
+                  </span>
+                </div>
+                <p className="text-xs text-neutral-600 line-clamp-2">
+                  {analysisResult.explanation}
+                </p>
+                <div className="pt-2 flex items-center justify-between border-t border-neutral-100 text-[11px] text-neutral-500">
+                  <span>Confidence: {analysisResult.confidence.toUpperCase()}</span>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("analysis")}
+                    className="font-semibold text-blue-600 hover:underline"
+                  >
+                    View in Workstation &rarr;
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div
+                className="rounded-xl border bg-white p-12 text-center"
+                style={{ borderColor: "var(--lv-border)" }}
+              >
+                <Clock className="h-8 w-8 text-neutral-400 mx-auto mb-3" />
+                <h3 className="text-sm font-semibold text-neutral-800">
+                  No Recorded Cases Yet
+                </h3>
+                <p className="text-xs text-neutral-500 max-w-sm mx-auto mt-1 mb-4">
+                  Assess an X-ray in the Diagnostic Analysis tab to view and archive structured audit reports here.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("analysis")}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-white"
+                  style={{ background: "var(--lv-blue)" }}
+                >
+                  Go to Analysis
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </main>
     </div>
+  </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback } from "react";
 import type { BBox } from "@/lib/types";
 import { ViewerToolbar } from "@/components/viewer-toolbar";
 import { HeatmapOverlay } from "@/components/heatmap-overlay";
@@ -83,10 +83,12 @@ export function XrayViewer({
     [],
   );
 
-  // Reset view when image changes
-  useEffect(() => {
-    handleReset();
-  }, [imageUrl, handleReset]);
+  const [prevImageUrl, setPrevImageUrl] = useState(imageUrl);
+  if (imageUrl !== prevImageUrl) {
+    setPrevImageUrl(imageUrl);
+    setZoom(1);
+    setPan({ x: 0, y: 0 });
+  }
 
   if (!imageUrl) {
     return (
