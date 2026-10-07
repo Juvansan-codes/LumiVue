@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Logo } from "@/components/logo";
+import { useAuth } from "@/lib/auth-context";
 import {
   Info,
   Stethoscope,
@@ -11,6 +12,7 @@ import {
   PanelLeftOpen,
   ShieldCheck,
   ChevronRight,
+  LogOut,
 } from "lucide-react";
 
 export type ActiveTab = "about" | "analysis" | "history";
@@ -23,6 +25,12 @@ interface SidebarProps {
 
 export function Sidebar({ activeTab, onTabChange, className = "" }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
+  const { user, signOut } = useAuth();
+
+  const displayName =
+    user?.user_metadata?.full_name ||
+    user?.email?.split("@")[0] ||
+    "Clinician";
 
   const navItems = [
     {
@@ -188,7 +196,7 @@ export function Sidebar({ activeTab, onTabChange, className = "" }: SidebarProps
         {!collapsed && (
           <div className="flex-1 min-w-0">
             <div className="text-xs font-semibold text-neutral-900 truncate">
-              Dr. Clinician
+              {displayName}
             </div>
             <div className="flex items-center gap-1.5 text-[10px] text-emerald-600 font-medium">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 inline-block" />
@@ -196,6 +204,16 @@ export function Sidebar({ activeTab, onTabChange, className = "" }: SidebarProps
             </div>
           </div>
         )}
+
+        <button
+          type="button"
+          onClick={() => void signOut()}
+          className="p-1.5 rounded-lg text-neutral-400 hover:text-red-600 hover:bg-red-50 transition-colors shrink-0"
+          title="Sign Out"
+          aria-label="Sign Out"
+        >
+          <LogOut className="h-4 w-4" />
+        </button>
       </div>
     </aside>
   );
