@@ -61,21 +61,29 @@ async def run_analysis(
         return _mock_response(patient_context)
 
     # ---- REAL PIPELINE ----
-    
+
     # 1. Vision Service (DenseNet + GradCAM + Image Quality)
     try:
         cv_result = vision_service.analyze_image(image_bytes)
     except Exception as e:
-        # Fallback or error handling; for now raise to be caught by route or middleware
         raise RuntimeError(f"VisionService failed: {e}")
 
-    # 2. MedGemma Service
-    medgemma = MedGemmaService()
-    mg_result = medgemma.analyze(
-        image_bytes=image_bytes, 
-        patient_context=patient_context,
-        model_score=cv_result["model_score"]
-    )
+    # 2. MedGemma Service — remote (LAN) or local mock
+    if settings.use_remote_medgemma:
+        from app.services.medgemma_client import RemoteMedGemmaClient
+        client = RemoteMedGemmaClient()
+        mg_result = await client.analyze(
+            image_bytes=image_bytes,
+            patient_context=patient_context,
+            model_score=cv_result["model_score"],
+        )
+    else:
+        medgemma_svc = MedGemmaService()
+        mg_result = medgemma_svc.analyze(
+            image_bytes=image_bytes,
+            patient_context=patient_context,
+            model_score=cv_result["model_score"],
+        )
     
     # If the user didn't provide patient_context, we can fall back to using MedGemma's supporting findings as clinical evidence,
     # or we can parse the patient_context. For simplicity, we use MedGemma's structured supporting_findings.
