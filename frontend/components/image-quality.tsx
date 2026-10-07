@@ -1,7 +1,7 @@
 "use client";
 
 import type { ImageQualityInfo } from "@/lib/types";
-import { CheckCircle2, AlertTriangle, XCircle, Sliders } from "lucide-react";
+import { AlertTriangle, Sliders } from "lucide-react";
 import { StatusBadge } from "@/components/status-badge";
 
 interface ImageQualityProps {

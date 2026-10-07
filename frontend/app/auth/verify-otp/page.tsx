@@ -35,9 +35,9 @@ function VerifyOtpContent() {
 
   const { verifyOtp, verifyTokenHash, resendOtp, user } = useAuth();
 
-  const [email, setEmail] = useState(emailParam);
+  const email = emailParam;
   const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(() => Boolean(tokenHashParam));
   const [resending, setResending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -55,21 +55,27 @@ function VerifyOtpContent() {
 
   // Handle direct link verification via token_hash (from Supabase confirmation emails)
   useEffect(() => {
-    if (tokenHashParam && !isVerified) {
-      setLoading(true);
-      verifyTokenHash(tokenHashParam, typeParam || "signup").then(({ error: tokenErr }) => {
-        setLoading(false);
-        if (tokenErr) {
-          setError(tokenErr.message || "Invalid or expired confirmation link.");
-        } else {
-          setIsVerified(true);
-          setSuccess("Email successfully confirmed! Redirecting to workstation...");
-          setTimeout(() => {
-            router.push("/");
-          }, 1200);
-        }
-      });
-    }
+    if (!tokenHashParam || isVerified) return;
+    let isMounted = true;
+
+    void (async () => {
+      const { error: tokenErr } = await verifyTokenHash(tokenHashParam, typeParam || "signup");
+      if (!isMounted) return;
+      setLoading(false);
+      if (tokenErr) {
+        setError(tokenErr.message || "Invalid or expired confirmation link.");
+      } else {
+        setIsVerified(true);
+        setSuccess("Email successfully confirmed! Redirecting to workstation...");
+        setTimeout(() => {
+          router.push("/");
+        }, 1200);
+      }
+    })();
+
+    return () => {
+      isMounted = false;
+    };
   }, [tokenHashParam, typeParam, verifyTokenHash, isVerified, router]);
 
   // Focus the first input on initial mount
@@ -78,13 +84,6 @@ function VerifyOtpContent() {
       inputRefs.current[0].focus();
     }
   }, []);
-
-  // Sync email from search params if updated
-  useEffect(() => {
-    if (emailParam && !email) {
-      setEmail(emailParam);
-    }
-  }, [emailParam, email]);
 
   // Resend cooldown timer
   useEffect(() => {

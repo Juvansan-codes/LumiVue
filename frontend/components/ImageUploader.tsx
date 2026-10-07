@@ -15,7 +15,7 @@ interface ImageUploaderProps {
   onImageSelect?: (file: File) => void;
 }
 
-export default function ImageUploader({ onImageSelect }: ImageUploaderProps) {
+export default function ImageUploader({ onImageSelect: _onImageSelect }: ImageUploaderProps) {
   return (
     <div className="rounded-xl border-2 border-dashed border-neutral-700 p-12 text-center transition hover:border-cyan-500/50">
       <p className="text-sm text-neutral-400">
