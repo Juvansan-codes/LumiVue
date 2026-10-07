@@ -1,8 +1,7 @@
 // =============================================================================
-// LumiVue — Shared TypeScript Types
+// LumiVue — TypeScript Type Definitions
 // =============================================================================
-// These types mirror the shared API contract in contracts/analysis-response.schema.json
-// Any changes must be reflected in both places.
+// Shared types for the API contract and UI state.
 // =============================================================================
 
 /** Bounding box coordinates [x, y, width, height] */
@@ -28,50 +27,60 @@ export type Finding =
 
 /** Evidence derived from the chest X-ray image analysis */
 export interface ImageEvidence {
-  /** Whether image-based evidence is available */
-  available: boolean;
-  /** Bounding box of the region of interest, if available */
+  model: string;
+  score: number;
   bbox: BBox | null;
-  /** Whether a Grad-CAM heatmap overlay is available */
   heatmap_available: boolean;
   /** Base64 encoded PNG string of the heatmap overlay */
   heatmap_base64?: string | null;
 }
 
+// Removed old conflicting types to align strictly with the backend API contract.
+
 /** Full analysis response from POST /analyze */
 export interface AnalysisResponse {
-  /** Unique identifier for this analysis run */
   analysis_id: string;
-  /** The finding category */
   finding: Finding;
-  /** Raw DenseNet model prediction score (0.0–1.0) */
   model_score: number;
-  /** Confidence level computed by the confidence engine */
   confidence: ConfidenceLevel;
-  /** Image quality assessment result */
-  image_quality: ImageQuality;
-  /** Image-level evidence (bounding box, heatmap) */
   image_evidence: ImageEvidence;
-  /** Clinical evidence items that support the finding */
   clinical_evidence: string[];
-  /** Human-readable explanation for the clinician */
   explanation: string;
+  image_quality: ImageQuality;
 }
 
-/** Request payload for the analysis (sent as multipart form) */
-export interface AnalysisRequest {
-  /** The chest X-ray image file */
-  image: File;
-  /** Optional patient clinical context (JSON string) */
-  patient_context?: string;
+/** Patient clinical context submitted with analysis */
+export interface PatientContext {
+  age: string;
+  sex: string;
+  spo2: string;
+  temperature: string;
+  symptom_duration: string;
+  symptoms: string[];
+  clinical_notes: string;
 }
 
-/** Health check response from GET /health */
+/** Analysis pipeline step */
+export interface PipelineStep {
+  id: string;
+  label: string;
+  status: "pending" | "active" | "complete" | "error";
+}
+
+/** Application state for the analysis workflow */
+export type AppState =
+  | "idle"
+  | "uploading"
+  | "analyzing"
+  | "complete"
+  | "error";
+
+/** Health check response */
 export interface HealthResponse {
   status: string;
 }
 
-/** Model info response from GET /model-info */
+/** Model info response */
 export interface ModelInfoResponse {
   project: string;
   classifier: string;

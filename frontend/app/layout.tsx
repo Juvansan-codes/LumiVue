@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { AuthProvider } from "@/lib/auth-context";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,20 +14,33 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "LumiVue — Evidence-Grounded Pneumonia Intelligence",
+  title: "LumiVue — Evidence-Grounded Medical Image Intelligence",
   description:
-    "AI-powered second-opinion assistant for chest X-ray pneumonia detection. " +
-    "Evidence-grounded multimodal analysis for clinicians.",
+    "AI-powered second-opinion assistant for chest X-ray pneumonia assessment. " +
+    "Evidence-grounded multimodal analysis combining visual evidence with clinical context.",
+  keywords: [
+    "medical AI",
+    "chest X-ray",
+    "pneumonia detection",
+    "clinical decision support",
+    "evidence-grounded",
+  ],
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-neutral-950 text-neutral-100">
-        {children}
+      <body className="min-h-full flex flex-col bg-white text-[var(--lv-black)]">
+        <AuthProvider>
+          <main className="flex-1 flex flex-col">{children}</main>
+        </AuthProvider>
       </body>
     </html>
   );

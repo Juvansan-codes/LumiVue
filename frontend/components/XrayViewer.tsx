@@ -17,7 +17,7 @@ interface XrayViewerProps {
   imageEvidence?: ImageEvidence | null;
 }
 
-export default function XrayViewer({ imageSrc, imageEvidence }: XrayViewerProps) {
+export default function XrayViewer({ imageSrc, imageEvidence: _imageEvidence }: XrayViewerProps) {
   return (
     <div className="flex aspect-square items-center justify-center rounded-xl border border-neutral-800 bg-neutral-950">
       {imageSrc ? (

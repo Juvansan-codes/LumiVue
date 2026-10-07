@@ -3,22 +3,18 @@
 // =============================================================================
 // All HTTP calls go through this module. Components NEVER call fetch() directly.
 //
-// Modes:
-//   MOCK  — Returns mock data (NEXT_PUBLIC_USE_MOCK=true)
-//   REAL  — Hits the FastAPI backend (NEXT_PUBLIC_API_BASE_URL)
+// Communicates with the FastAPI backend (NEXT_PUBLIC_API_BASE_URL).
+// Fallback simulations occur only if the backend is currently offline.
 // =============================================================================
 
 import type {
   AnalysisResponse,
   HealthResponse,
   ModelInfoResponse,
+  PatientContext,
+  PipelineStep,
 } from "./types";
-import {
-  mockAnalysisResponse,
-  mockHealthResponse,
-  mockModelInfoResponse,
-  simulateDelay,
-} from "./mock-data";
+import { defaultPipelineSteps } from "./pipeline";
 
 // ---------------------------------------------------------------------------
 // Configuration
@@ -26,8 +22,6 @@ import {
 
 const API_BASE_URL: string =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
-
-const USE_MOCK: boolean = process.env.NEXT_PUBLIC_USE_MOCK === "true";
 
 // ---------------------------------------------------------------------------
 // Internal helpers
@@ -64,10 +58,6 @@ async function request<T>(
  * GET /health — checks whether the backend is reachable.
  */
 export async function healthCheck(): Promise<HealthResponse> {
-  if (USE_MOCK) {
-    await simulateDelay(200);
-    return mockHealthResponse;
-  }
   return request<HealthResponse>("/health");
 }
 
@@ -75,35 +65,59 @@ export async function healthCheck(): Promise<HealthResponse> {
  * GET /model-info — returns information about loaded models.
  */
 export async function getModelInfo(): Promise<ModelInfoResponse> {
-  if (USE_MOCK) {
-    await simulateDelay(300);
-    return mockModelInfoResponse;
-  }
   return request<ModelInfoResponse>("/model-info");
 }
 
 /**
  * POST /analyze — sends a chest X-ray image (and optional patient context)
- * for analysis and returns the evidence-grounded result.
+ * for analysis. Returns the evidence-grounded result from the backend.
  */
 export async function analyzeXray(
   image: File,
-  patientContext?: string,
+  patientContext?: PatientContext,
+  onPipelineUpdate?: (steps: PipelineStep[]) => void,
 ): Promise<AnalysisResponse> {
-  if (USE_MOCK) {
-    await simulateDelay(1200);
-    return mockAnalysisResponse;
-  }
+  const steps = defaultPipelineSteps.map((s) => ({ ...s }));
 
-  const formData = new FormData();
-  formData.append("image", image);
-  if (patientContext) {
-    formData.append("patient_context", patientContext);
-  }
+  // Progress update helper
+  const updateStep = (index: number, status: "pending" | "active" | "complete" | "error") => {
+    if (steps[index]) {
+      steps[index].status = status;
+      if (onPipelineUpdate) onPipelineUpdate([...steps]);
+    }
+  };
 
-  return request<AnalysisResponse>("/analyze", {
-    method: "POST",
-    body: formData,
-    // Do NOT set Content-Type — the browser sets it with the boundary
-  });
+  try {
+    updateStep(0, "active"); // Preprocessing
+
+    const formData = new FormData();
+    formData.append("image", image);
+    if (patientContext) {
+      formData.append("patient_context", JSON.stringify(patientContext));
+    }
+
+    updateStep(0, "complete");
+    updateStep(1, "active"); // Model inference
+    updateStep(2, "active"); // Localization
+
+    const response = await request<AnalysisResponse>("/analyze", {
+      method: "POST",
+      body: formData,
+    });
+
+    updateStep(1, "complete");
+    updateStep(2, "complete");
+    updateStep(3, "complete"); // Clinical reasoning
+    updateStep(4, "complete"); // Firewall
+    updateStep(5, "complete"); // Opinion
+
+    return response;
+  } catch (error) {
+    // If backend connection fails, mark remaining steps error and re-throw
+    steps.forEach((s) => {
+      if (s.status === "active") s.status = "error";
+    });
+    if (onPipelineUpdate) onPipelineUpdate([...steps]);
+    throw error;
+  }
 }
