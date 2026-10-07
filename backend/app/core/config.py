@@ -22,9 +22,16 @@ class Settings(BaseSettings):
     port: int = 8000
 
     # ---- MedGemma ----
-    medgemma_mode: str = "mock"  # "mock" | "api" | "local"
-    medgemma_api_url: str = ""
+    # Modes:
+    #   "mock"   — no real model, returns placeholder responses
+    #   "remote" — calls the MedGemma local HTTP service on another machine
+    #   "api"    — calls an external hosted API
+    #   "local"  — loads MedGemma in-process (not used in Phase 6B)
+    medgemma_mode: str = "mock"  # "mock" | "remote" | "api" | "local"
+    medgemma_base_url: str = ""  # e.g. http://192.168.1.25:8001  (remote mode)
+    medgemma_api_url: str = ""   # legacy / external API URL
     medgemma_api_key: str = ""
+    medgemma_timeout: float = 120.0  # seconds before giving up on a remote call
 
     # ---- Model Paths & Config ----
     model_path: str = "models/lumivue_densenet121_rsna.pth"
@@ -34,6 +41,11 @@ class Settings(BaseSettings):
     def is_mock(self) -> bool:
         """Whether the application is running in mock mode."""
         return self.medgemma_mode == "mock"
+
+    @property
+    def use_remote_medgemma(self) -> bool:
+        """Whether to call the MedGemma laptop service over the LAN."""
+        return self.medgemma_mode == "remote"
 
 
 settings = Settings()
