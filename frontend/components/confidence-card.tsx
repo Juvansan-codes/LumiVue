@@ -1,15 +1,14 @@
 "use client";
 
-import type { ConfidenceLevel, ConfidenceFactors } from "@/lib/types";
+import type { ConfidenceLevel } from "@/lib/types";
 import { Check, ShieldCheck, AlertCircle } from "lucide-react";
 import { StatusBadge } from "@/components/status-badge";
 
 interface ConfidenceCardProps {
   confidence: ConfidenceLevel;
-  factors?: ConfidenceFactors;
 }
 
-export function ConfidenceCard({ confidence, factors }: ConfidenceCardProps) {
+export function ConfidenceCard({ confidence }: ConfidenceCardProps) {
   const badgeConfig: Record<
     ConfidenceLevel,
     { label: string; variant: "success" | "warning" | "danger" }
@@ -21,11 +20,10 @@ export function ConfidenceCard({ confidence, factors }: ConfidenceCardProps) {
 
   const currentBadge = badgeConfig[confidence] ?? badgeConfig.moderate;
 
-  const defaultFactors: ConfidenceFactors = {
+  const defaultFactors = {
     image_signal: confidence !== "low",
     clinical_context_supportive: confidence === "high",
     adequate_image_quality: true,
-    ...factors,
   };
 
   return (

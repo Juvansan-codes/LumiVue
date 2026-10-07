@@ -29,7 +29,7 @@ export default function AnalysisResult({ result }: AnalysisResultProps) {
         </h2>
         <div className="flex gap-2">
           <ConfidenceBadge level={result.confidence} />
-          <ImageQualityBadge quality={result.image_quality?.status} />
+          <ImageQualityBadge quality={result.image_quality} />
         </div>
       </div>
 

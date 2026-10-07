@@ -72,11 +72,19 @@ export async function getModelInfo(): Promise<ModelInfoResponse> {
  * POST /analyze — sends a chest X-ray image (and optional patient context)
  * for analysis. Returns the evidence-grounded result from the backend.
  */
+import { simulatePipeline } from "./mock-data";
+
+const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === "true";
+
 export async function analyzeXray(
   image: File,
   patientContext?: PatientContext,
   onPipelineUpdate?: (steps: PipelineStep[]) => void,
 ): Promise<AnalysisResponse> {
+  if (USE_MOCK) {
+    return simulatePipeline(onPipelineUpdate || (() => {}));
+  }
+
   const steps = defaultPipelineSteps.map((s) => ({ ...s }));
 
   // Progress update helper

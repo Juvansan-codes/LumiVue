@@ -11,11 +11,17 @@ interface EvidencePanelProps {
 }
 
 export function EvidencePanel({ result }: EvidencePanelProps) {
-  const { image_evidence, clinical_evidence, image_quality, evidence_validation } = result;
+  const { image_evidence, clinical_evidence, image_quality } = result;
+
+  const evidence_validation = {
+    supported: result.finding !== "no_pneumonia_detected",
+    image_evidence: !!image_evidence.bbox,
+    clinical_evidence: clinical_evidence.length > 0
+  };
 
   return (
     <div className="space-y-4">
-      {/* Evidence Firewall Verification */}
+      {/* Evidence Validation Firewall */}
       <EvidenceFirewall validation={evidence_validation} />
 
       {/* Visual Image Evidence Summary */}

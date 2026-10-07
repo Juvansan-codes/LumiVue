@@ -413,7 +413,6 @@ export default function HomePage() {
                     <FindingCard result={analysisResult} />
                     <ConfidenceCard
                       confidence={analysisResult.confidence}
-                      factors={analysisResult.confidence_factors}
                     />
                     <AiExplanation explanation={analysisResult.explanation} />
                     <EvidencePanel result={analysisResult} />

@@ -1,6 +1,6 @@
 "use client";
 
-import type { Finding, ConfidenceLevel, ImageQualityStatus } from "@/lib/types";
+import type { Finding, ConfidenceLevel, ImageQuality } from "@/lib/types";
 
 type StatusVariant = "success" | "warning" | "danger" | "info" | "muted";
 
@@ -99,7 +99,7 @@ export function confidenceToBadge(confidence: ConfidenceLevel): {
 }
 
 /** Map ImageQuality to StatusBadge props */
-export function qualityToBadge(quality: ImageQualityStatus): {
+export function qualityToBadge(quality: ImageQuality["quality"]): {
   variant: StatusVariant;
   label: string;
 } {

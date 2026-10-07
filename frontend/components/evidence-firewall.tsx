@@ -1,11 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import type { EvidenceValidation } from "@/lib/types";
 import { ShieldAlert, ShieldCheck, Info, Check, X } from "lucide-react";
 
 interface EvidenceFirewallProps {
-  validation: EvidenceValidation;
+  validation: {
+    supported: boolean;
+    image_evidence: boolean;
+    clinical_evidence: boolean;
+  };
 }
 
 export function EvidenceFirewall({ validation }: EvidenceFirewallProps) {

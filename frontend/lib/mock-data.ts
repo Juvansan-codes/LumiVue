@@ -12,15 +12,10 @@ export const mockAnalysisResponse: AnalysisResponse = {
   finding: "suspected_pneumonia",
   model_score: 0.82,
   confidence: "high",
-  confidence_factors: {
-    image_signal: true,
-    clinical_context_supportive: true,
-    adequate_image_quality: true,
-  },
   image_evidence: {
     model: "LumiVue DenseNet-121",
     score: 0.82,
-    bbox: [412, 508, 701, 872],
+    bbox: [412, 508, 289, 364], // [x, y, width, height]
     heatmap_available: true,
   },
   clinical_evidence: [
@@ -34,15 +29,7 @@ export const mockAnalysisResponse: AnalysisResponse = {
     "fever and productive cough provide supporting clinical context. " +
     "This is a decision-support suggestion — please correlate with your clinical judgment.",
   image_quality: {
-    status: "good",
-    sharpness: "Good",
-    contrast: "Good",
-    resolution: "Adequate",
-  },
-  evidence_validation: {
-    supported: true,
-    image_evidence: true,
-    clinical_evidence: true,
+    quality: "good",
   },
 };
 
@@ -51,12 +38,7 @@ export const mockNegativeResponse: AnalysisResponse = {
   analysis_id: "lv-20261007-002",
   finding: "no_pneumonia_detected",
   model_score: 0.12,
-  confidence: "high",
-  confidence_factors: {
-    image_signal: true,
-    clinical_context_supportive: false,
-    adequate_image_quality: true,
-  },
+  confidence: "low",
   image_evidence: {
     model: "LumiVue DenseNet-121",
     score: 0.12,
@@ -69,15 +51,7 @@ export const mockNegativeResponse: AnalysisResponse = {
     "pneumonia. No supporting clinical evidence was provided. " +
     "Please correlate with your clinical findings.",
   image_quality: {
-    status: "good",
-    sharpness: "Good",
-    contrast: "Good",
-    resolution: "Good",
-  },
-  evidence_validation: {
-    supported: false,
-    image_evidence: false,
-    clinical_evidence: false,
+    quality: "good",
   },
 };
 

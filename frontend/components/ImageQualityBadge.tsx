@@ -14,7 +14,7 @@ interface ImageQualityBadgeProps {
   quality?: ImageQuality | null;
 }
 
-const colorMap: Record<ImageQuality, string> = {
+const colorMap: Record<ImageQuality["quality"], string> = {
   good: "bg-emerald-600/20 text-emerald-400 border-emerald-600/30",
   acceptable: "bg-sky-600/20 text-sky-400 border-sky-600/30",
   poor: "bg-amber-600/20 text-amber-400 border-amber-600/30",
@@ -24,11 +24,13 @@ const colorMap: Record<ImageQuality, string> = {
 export default function ImageQualityBadge({ quality }: ImageQualityBadgeProps) {
   if (!quality) return null;
 
+  const q = quality.quality;
+
   return (
     <span
-      className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium ${colorMap[quality]}`}
+      className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium ${colorMap[q]}`}
     >
-      Image: {quality.charAt(0).toUpperCase() + quality.slice(1)}
+      Image: {q.charAt(0).toUpperCase() + q.slice(1)}
     </span>
   );
 }

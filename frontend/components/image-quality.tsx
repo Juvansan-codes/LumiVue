@@ -1,19 +1,19 @@
 "use client";
 
-import type { ImageQualityInfo } from "@/lib/types";
+import type { ImageQuality as ImageQualityType } from "@/lib/types";
 import { AlertTriangle, Sliders } from "lucide-react";
 import { StatusBadge } from "@/components/status-badge";
 
 interface ImageQualityProps {
-  quality: ImageQualityInfo;
+  quality: ImageQualityType;
 }
 
 export function ImageQuality({ quality }: ImageQualityProps) {
-  const isGood = quality.status === "good";
-  const isPoor = quality.status === "poor" || quality.status === "rejected";
+  const isGood = quality.quality === "good";
+  const isPoor = quality.quality === "poor" || quality.quality === "rejected";
 
   const getStatusBadge = () => {
-    switch (quality.status) {
+    switch (quality.quality) {
       case "good":
         return { label: "Good Quality", variant: "success" as const };
       case "acceptable":
@@ -77,26 +77,26 @@ export function ImageQuality({ quality }: ImageQualityProps) {
       <div className="grid grid-cols-3 gap-2 pt-2 border-t" style={{ borderColor: "var(--lv-border-light)" }}>
         <div className="p-2 rounded-lg bg-neutral-50 border border-neutral-100">
           <span className="text-[10px] text-neutral-400 block uppercase font-semibold">
-            Sharpness
+            Blur Score
           </span>
           <span className="text-xs font-medium text-neutral-800">
-            {quality.sharpness || (isGood ? "Good" : "Sub-optimal")}
+            {quality.blur_score ? quality.blur_score.toFixed(2) : (isGood ? "Good" : "Sub-optimal")}
           </span>
         </div>
         <div className="p-2 rounded-lg bg-neutral-50 border border-neutral-100">
           <span className="text-[10px] text-neutral-400 block uppercase font-semibold">
-            Contrast
+            Contrast Score
           </span>
           <span className="text-xs font-medium text-neutral-800">
-            {quality.contrast || (isGood ? "Good" : "Adequate")}
+            {quality.contrast_score ? quality.contrast_score.toFixed(2) : (isGood ? "Good" : "Adequate")}
           </span>
         </div>
         <div className="p-2 rounded-lg bg-neutral-50 border border-neutral-100">
           <span className="text-[10px] text-neutral-400 block uppercase font-semibold">
-            Resolution
+            Brightness
           </span>
           <span className="text-xs font-medium text-neutral-800">
-            {quality.resolution || (isGood ? "Adequate" : "Low")}
+            {quality.brightness_score ? quality.brightness_score.toFixed(2) : (isGood ? "Adequate" : "Low")}
           </span>
         </div>
       </div>

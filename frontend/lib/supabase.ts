@@ -60,7 +60,7 @@ export async function saveAnalysisToSupabase(
           file_path: imageUrl,
           file_type: "image/png",
           image_url: imageUrl,
-          image_quality: analysis.image_quality?.status || "good",
+          image_quality: analysis.image_quality?.quality || "good",
           quality_details: analysis.image_quality || {},
         })
         .select("id")
@@ -79,7 +79,6 @@ export async function saveAnalysisToSupabase(
       finding: analysis.finding,
       model_score: analysis.model_score,
       confidence: analysis.confidence,
-      confidence_factors: analysis.confidence_factors,
       heatmap_url: analysis.image_evidence?.heatmap_available
         ? imageUrl
         : null,
@@ -89,11 +88,6 @@ export async function saveAnalysisToSupabase(
       bbox_ymax: analysis.image_evidence?.bbox?.[3] ?? null,
       clinical_evidence: analysis.clinical_evidence,
       explanation: analysis.explanation,
-      firewall_supported: analysis.evidence_validation?.supported ?? true,
-      firewall_image_evidence:
-        analysis.evidence_validation?.image_evidence ?? true,
-      firewall_clinical_evidence:
-        analysis.evidence_validation?.clinical_evidence ?? true,
     });
 
     if (analysisError) {
@@ -124,16 +118,11 @@ export async function fetchCaseHistoryFromSupabase(): Promise<AnalysisResponse[]
       return [];
     }
 
-    return data.map((row) => ({
+    return data.map((row: any) => ({
       analysis_id: row.analysis_id,
       finding: row.finding,
       model_score: Number(row.model_score),
       confidence: row.confidence,
-      confidence_factors: row.confidence_factors || {
-        image_signal: false,
-        clinical_context_supportive: false,
-        adequate_image_quality: false,
-      },
       image_evidence: {
         model: "LumiVue DenseNet-121",
         score: Number(row.model_score),
@@ -146,12 +135,7 @@ export async function fetchCaseHistoryFromSupabase(): Promise<AnalysisResponse[]
       clinical_evidence: row.clinical_evidence || [],
       explanation: row.explanation,
       image_quality: {
-        status: "good",
-      },
-      evidence_validation: {
-        supported: row.firewall_supported,
-        image_evidence: row.firewall_image_evidence,
-        clinical_evidence: row.firewall_clinical_evidence,
+        quality: "good",
       },
     }));
   } catch (err) {
