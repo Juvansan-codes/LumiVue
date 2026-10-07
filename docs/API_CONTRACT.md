@@ -74,11 +74,17 @@ curl -X POST http://localhost:8000/analyze \
   "finding": "suspected_pneumonia",
   "model_score": 0.82,
   "confidence": "high",
-  "image_quality": "good",
+  "image_quality": {
+    "quality": "good",
+    "blur_score": 0.95,
+    "brightness_score": 0.88,
+    "contrast_score": 0.90
+  },
   "image_evidence": {
     "available": true,
-    "bbox": [120, 160, 340, 390],
-    "heatmap_available": true
+    "bbox": [120, 160, 220, 230],
+    "heatmap_available": true,
+    "heatmap_base64": "iVBORw0KGgoAAAANSUhEUgAAAAE..."
   },
   "clinical_evidence": [
     "fever",
@@ -99,12 +105,16 @@ curl -X POST http://localhost:8000/analyze \
 | `finding` | string | `suspected_pneumonia`, `no_pneumonia_detected`, `inconclusive`, `rejected` | The analysis finding category |
 | `model_score` | float | 0.0–1.0 | Raw DenseNet-121 prediction score |
 | `confidence` | string | `low`, `moderate`, `high` | Confidence level from the confidence engine |
-| `image_quality` | string | `good`, `acceptable`, `poor`, `rejected` | Image quality assessment |
+| `image_quality` | object | | Image quality assessment result including `quality` string and optional scores |
 | `image_evidence.available` | boolean | | Whether image evidence exists |
-| `image_evidence.bbox` | int[4] \| null | [x_min, y_min, x_max, y_max] | Bounding box of the region of interest |
+| `image_evidence.bbox` | int[4] \| null | [x, y, width, height] | Bounding box of the model-highlighted visual evidence in original image coordinates |
 | `image_evidence.heatmap_available` | boolean | | Whether a Grad-CAM heatmap is available |
+| `image_evidence.heatmap_base64` | string \| null | | Base64 encoded PNG string of the heatmap overlay |
 | `clinical_evidence` | string[] | | Clinical evidence items supporting the finding |
 | `explanation` | string | | Human-readable explanation for the clinician |
+
+### Visual Evidence Terminology
+The `bbox` and `heatmap` provide **"Model-highlighted visual evidence"**. Do NOT describe these as an exact pneumonia segmentation or clinically validated lesion localization.
 
 ---
 

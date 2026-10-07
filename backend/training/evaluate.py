@@ -1,91 +1,159 @@
 """
-LumiVue — Prototype Evaluation Metrics
-========================================
-Calculates metrics and plots curves for the held-out validation set.
+LumiVue — Phase 6B Evaluation
+=============================
+Evaluates the retrained DenseNet-121 (v2) on the validation split.
 """
 
+import os
+import sys
 import json
 from pathlib import Path
 
+import torch
+from torch.utils.data import DataLoader
+from sklearn.metrics import roc_auc_score, average_precision_score, precision_recall_fscore_support, confusion_matrix
 import matplotlib.pyplot as plt
 import numpy as np
-from sklearn.metrics import (
-    accuracy_score,
-    auc,
-    confusion_matrix,
-    f1_score,
-    precision_recall_curve,
-    precision_score,
-    recall_score,
-    roc_auc_score,
-    roc_curve,
-)
 
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-def evaluate_prototype(y_true: list[float], y_prob: list[float], output_dir: Path, threshold: float = 0.5) -> dict:
-    """
-    Calculate prototype metrics (Accuracy, Precision, Recall, Specificity, F1, ROC-AUC, PR-AUC).
-    Generates ROC and PR curve plots.
-    """
-    output_dir.mkdir(parents=True, exist_ok=True)
+from training.dataset import RSNAPneumoniaDataset
+from training.config import config
+from app.models.pneumonia import PneumoniaModel
+
+def main():
+    print("=" * 60)
+    print("LumiVue Phase 6B: V2 Model Evaluation")
+    print("=" * 60)
     
-    y_true_np = np.array(y_true)
-    y_prob_np = np.array(y_prob)
-    y_pred_np = (y_prob_np >= threshold).astype(float)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    data_dir = Path("data/raw")
     
-    # Classification metrics
-    acc = accuracy_score(y_true_np, y_pred_np)
-    prec = precision_score(y_true_np, y_pred_np, zero_division=0)
-    rec = recall_score(y_true_np, y_pred_np, zero_division=0)
-    f1 = f1_score(y_true_np, y_pred_np, zero_division=0)
-    
-    # Confusion Matrix
-    tn, fp, fn, tp = confusion_matrix(y_true_np, y_pred_np).ravel()
-    specificity = tn / (tn + fp) if (tn + fp) > 0 else 0.0
-    
-    # AUC metrics
-    try:
-        roc_auc = roc_auc_score(y_true_np, y_prob_np)
-    except ValueError:
-        roc_auc = 0.0  # Only 1 class present in batch
+    # Load dataset
+    # We must use exactly the same transform pipeline as inference (no augmentations)
+    val_dataset = RSNAPneumoniaDataset(data_dir=data_dir, split="val")
+    def custom_collate(batch):
+        images = torch.stack([item["image"] for item in batch])
+        labels = torch.stack([item["label"] for item in batch])
+        bboxes = [item["bboxes"] for item in batch]
+        patient_ids = [item["patient_id"] for item in batch]
+        original_shapes = [item["original_shape"] for item in batch]
+        return {
+            "image": images, 
+            "label": labels, 
+            "bboxes": bboxes, 
+            "patient_id": patient_ids, 
+            "original_shape": original_shapes
+        }
         
-    precision_array, recall_array, _ = precision_recall_curve(y_true_np, y_prob_np)
-    pr_auc = auc(recall_array, precision_array)
+    val_loader = DataLoader(
+        val_dataset,
+        batch_size=config.batch_size * 2, # evaluation can use larger batch
+        shuffle=False,
+        num_workers=config.num_workers,
+        collate_fn=custom_collate
+    )
     
-    metrics = {
-        "accuracy": float(acc),
-        "precision": float(prec),
-        "recall": float(rec),
-        "specificity": float(specificity),
-        "f1": float(f1),
-        "roc_auc": float(roc_auc),
-        "pr_auc": float(pr_auc),
-        "threshold": float(threshold),
-        "confusion_matrix": {"tn": int(tn), "fp": int(fp), "fn": int(fn), "tp": int(tp)}
-    }
+    # Load model
+    model = PneumoniaModel(device=device)
+    checkpoint_path = Path("models/lumivue_densenet121_rsna_v2.pth")
     
-    # Save ROC Curve
-    fpr, tpr, _ = roc_curve(y_true_np, y_prob_np)
-    plt.figure(figsize=(6, 6))
-    plt.plot(fpr, tpr, label=f'ROC curve (AUC = {roc_auc:.3f})')
-    plt.plot([0, 1], [0, 1], 'k--')
-    plt.xlim([0.0, 1.0])
-    plt.ylim([0.0, 1.05])
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive Rate')
-    plt.title('Receiver Operating Characteristic')
-    plt.legend(loc="lower right")
-    plt.savefig(output_dir / "roc_curve.png")
+    if not checkpoint_path.exists():
+        raise FileNotFoundError(f"V2 Checkpoint not found at {checkpoint_path}")
+        
+    model.load_checkpoint(checkpoint_path)
+    model.eval()
+    
+    y_true = []
+    y_prob = []
+    
+    print("\nRunning Evaluation over Validation Set...")
+    with torch.no_grad():
+        for batch_idx, batch in enumerate(val_loader):
+            images = batch["image"].to(device)
+            labels = batch["label"]
+            
+            with torch.amp.autocast(device_type='cuda', enabled=config.use_amp):
+                # We can use the PneumoniaModel predict wrapper or backbone directly
+                logits = model.backbone(images)
+                probs = torch.sigmoid(logits)
+                
+            y_true.extend(labels.cpu().numpy())
+            y_prob.extend(probs.cpu().numpy())
+            
+            if batch_idx % 200 == 0 and batch_idx > 0:
+                print(f"  Batch {batch_idx}/{len(val_loader)}")
+                
+    y_true = [int(y) for y in y_true]
+    y_prob = [float(y[0]) for y in y_prob]
+    
+    threshold = 0.50
+    y_pred = [1 if p >= threshold else 0 for p in y_prob]
+    
+    # Metrics
+    roc_auc = roc_auc_score(y_true, y_prob)
+    pr_auc = average_precision_score(y_true, y_prob)
+    precision, recall, f1, _ = precision_recall_fscore_support(y_true, y_pred, average="binary", zero_division=0)
+    
+    cm = confusion_matrix(y_true, y_pred, labels=[0, 1])
+    TN, FP, FN, TP = cm.ravel()
+    
+    specificity = TN / (TN + FP) if (TN + FP) > 0 else 0.0
+    accuracy = (TP + TN) / len(y_true)
+    
+    print("\n[Metrics]")
+    print(f"ROC-AUC:      {roc_auc:.4f}")
+    print(f"PR-AUC:       {pr_auc:.4f}")
+    print(f"Precision:    {precision:.4f}")
+    print(f"Recall:       {recall:.4f}")
+    print(f"Specificity:  {specificity:.4f}")
+    print(f"F1:           {f1:.4f}")
+    print(f"Accuracy:     {accuracy:.4f}")
+    
+    print("\n[Confusion Matrix (Threshold 0.50)]")
+    print(f"TP: {TP} | FP: {FP}")
+    print(f"FN: {FN} | TN: {TN}")
+    
+    # Verify math consistency
+    assert abs(recall - (TP / (TP + FN))) < 1e-4
+    assert abs(specificity - (TN / (TN + FP))) < 1e-4
+    
+    # Save CM
+    fig, ax = plt.subplots(figsize=(6, 5))
+    cax = ax.matshow(cm, cmap='Blues')
+    plt.colorbar(cax)
+    for (i, j), val in np.ndenumerate(cm):
+        ax.text(j, i, f'{val}', ha='center', va='center', color='red')
+    ax.set_xticks([0, 1])
+    ax.set_yticks([0, 1])
+    ax.set_xticklabels(['Normal', 'Pneumonia'])
+    ax.set_yticklabels(['Normal', 'Pneumonia'])
+    plt.ylabel('Ground Truth')
+    plt.xlabel('Prediction')
+    plt.title('V2 Confusion Matrix (Threshold 0.50)')
+    
+    runs_dir = Path("runs")
+    runs_dir.mkdir(parents=True, exist_ok=True)
+    cm_path = runs_dir / "v2_confusion_matrix.png"
+    plt.savefig(cm_path)
     plt.close()
+    print(f"-> Saved confusion matrix to {cm_path}")
     
-    # Save PR Curve
-    plt.figure(figsize=(6, 6))
-    plt.plot(recall_array, precision_array, label=f'PR curve (AUC = {pr_auc:.3f})')
-    plt.xlabel('Recall')
-    plt.ylabel('Precision')
-    plt.title('Precision-Recall Curve')
-    plt.legend(loc="lower left")
-    plt.savefig(output_dir / "pr_curve.png")
-    plt.close()
+    # Held-out Checkpoint Test
+    print("\n[Held-Out Checkpoint Test]")
     
-    return metrics
+    print(f"{'Patient ID':<40} | {'GT':<2} | {'Score':<6} | {'Prediction':<20}")
+    print("-" * 80)
+    for i in range(5):
+        sample = val_dataset[i]
+        pid = sample["patient_id"]
+        gt = int(sample["label"].item())
+        
+        img = sample["image"].unsqueeze(0).to(device)
+        res = model.predict(img)
+        pred_label = "suspected_pneumonia" if res.score >= threshold else "normal"
+        
+        print(f"{pid:<40} | {gt:<2} | {res.score:.4f} | {pred_label:<20}")
+
+if __name__ == "__main__":
+    main()

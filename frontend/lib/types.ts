@@ -5,14 +5,19 @@
 // Any changes must be reflected in both places.
 // =============================================================================
 
-/** Bounding box coordinates [x_min, y_min, x_max, y_max] */
+/** Bounding box coordinates [x, y, width, height] */
 export type BBox = [number, number, number, number];
 
 /** Confidence level derived from the confidence engine */
 export type ConfidenceLevel = "low" | "moderate" | "high";
 
 /** Image quality assessment result */
-export type ImageQuality = "good" | "acceptable" | "poor" | "rejected";
+export interface ImageQuality {
+  quality: "good" | "acceptable" | "poor" | "rejected";
+  blur_score?: number;
+  brightness_score?: number;
+  contrast_score?: number;
+}
 
 /** Possible analysis finding categories */
 export type Finding =
@@ -29,6 +34,8 @@ export interface ImageEvidence {
   bbox: BBox | null;
   /** Whether a Grad-CAM heatmap overlay is available */
   heatmap_available: boolean;
+  /** Base64 encoded PNG string of the heatmap overlay */
+  heatmap_base64?: string | null;
 }
 
 /** Full analysis response from POST /analyze */

@@ -112,23 +112,20 @@ class RSNAPneumoniaDataset(Dataset):
         if not patient_records:
             raise ValueError(f"No valid records found in {self.labels_file}")
 
-        # Unique patients for splitting to prevent leakage
-        patient_ids = sorted(list(patient_records.keys()))
-        
-        # Fixed reproducible split
-        rng = np.random.default_rng(seed)
-        rng.shuffle(patient_ids)
-        
-        if self.subset_size and self.subset_size < len(patient_ids):
-            patient_ids = patient_ids[:self.subset_size]
-        
-        split_idx = int(len(patient_ids) * 0.8)
-        if self.split == "train":
-            split_patients = patient_ids[:split_idx]
-        elif self.split == "val":
-            split_patients = patient_ids[split_idx:]
-        else:
-            raise ValueError(f"Invalid split: {self.split}")
+        # Load from pre-generated split files to guarantee 0 leakage
+        split_file = Path(__file__).parent / "runs" / "final_split" / f"{self.split}_patient_ids.csv"
+        if not split_file.exists():
+            raise FileNotFoundError(f"Split file missing: {split_file}. Run generate_splits.py first.")
+            
+        split_patients = []
+        with open(split_file, mode="r", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                split_patients.append(row["patientId"])
+                
+        # Optional: Apply subset_size strictly within this split
+        if self.subset_size and self.subset_size < len(split_patients):
+            split_patients = split_patients[:self.subset_size]
         
         # Flatten into dataset items
         # NOTE: A patient can have multiple bounding boxes. We store all bboxes for the patient.

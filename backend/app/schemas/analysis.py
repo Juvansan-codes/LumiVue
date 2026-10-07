@@ -16,6 +16,16 @@ from pydantic import BaseModel, Field
 # Sub-models
 # ---------------------------------------------------------------------------
 
+class ImageQuality(BaseModel):
+    """Detailed image quality assessment result."""
+    
+    quality: Literal["good", "acceptable", "poor", "rejected"] = Field(
+        description="Image quality assessment result"
+    )
+    blur_score: float | None = Field(default=None, description="Quantitative blur score")
+    brightness_score: float | None = Field(default=None, description="Quantitative brightness score")
+    contrast_score: float | None = Field(default=None, description="Quantitative contrast score")
+
 class ImageEvidence(BaseModel):
     """Evidence derived from the chest X-ray image analysis."""
 
@@ -24,11 +34,15 @@ class ImageEvidence(BaseModel):
     )
     bbox: list[int] | None = Field(
         default=None,
-        description="Bounding box [x_min, y_min, x_max, y_max] of the region of interest",
+        description="Bounding box [x, y, width, height] of the model-highlighted visual evidence in original image coordinates",
     )
     heatmap_available: bool = Field(
         default=False,
         description="Whether a Grad-CAM heatmap overlay is available",
+    )
+    heatmap_base64: str | None = Field(
+        default=None,
+        description="Base64 encoded PNG string of the heatmap overlay",
     )
 
 
@@ -53,7 +67,7 @@ class AnalysisResponse(BaseModel):
     confidence: Literal["low", "moderate", "high"] = Field(
         description="Confidence level computed by the confidence engine"
     )
-    image_quality: Literal["good", "acceptable", "poor", "rejected"] = Field(
+    image_quality: ImageQuality = Field(
         description="Image quality assessment result"
     )
     image_evidence: ImageEvidence = Field(
