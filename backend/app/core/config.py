@@ -26,8 +26,9 @@ class Settings(BaseSettings):
     medgemma_api_url: str = ""
     medgemma_api_key: str = ""
 
-    # ---- Model Paths ----
+    # ---- Model Paths & Config ----
     model_path: str = "models/lumivue_densenet121_rsna.pth"
+    pneumonia_threshold: float = 0.60
 
     @property
     def is_mock(self) -> bool:

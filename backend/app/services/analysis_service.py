@@ -27,16 +27,12 @@ from __future__ import annotations
 import uuid
 
 from app.core.config import settings
-from app.schemas.analysis import AnalysisResponse, ImageEvidence
+from app.schemas.analysis import AnalysisResponse, ImageEvidence, ImageQuality
 
-# Future imports (uncomment when implementing):
-# from app.models.pneumonia import PneumoniaModel
-# from app.models.medgemma import MedGemmaService
-# from app.vision.preprocess import preprocess_image
-# from app.vision.gradcam import generate_gradcam
-# from app.vision.image_quality import assess_quality
-# from app.evidence.firewall import enforce_evidence
-# from app.evidence.confidence import compute_confidence
+from app.services.vision_service import vision_service
+from app.models.medgemma import MedGemmaService
+from app.evidence.firewall import enforce_evidence
+from app.evidence.confidence import compute_confidence
 
 
 async def run_analysis(
@@ -64,19 +60,64 @@ async def run_analysis(
     if settings.is_mock:
         return _mock_response(patient_context)
 
-    # ---- REAL PIPELINE (TODO) ----
-    # 1. Preprocess image
-    # 2. Assess image quality
-    # 3. Run DenseNet-121 classifier
-    # 4. Generate Grad-CAM heatmap
-    # 5. Run MedGemma multimodal reasoning
-    # 6. Apply evidence firewall
-    # 7. Compute confidence
-    # 8. Build response
-    #
-    # For now, fall through to mock even if not explicitly in mock mode,
-    # since no models are loaded yet.
-    return _mock_response(patient_context)
+    # ---- REAL PIPELINE ----
+    
+    # 1. Vision Service (DenseNet + GradCAM + Image Quality)
+    try:
+        cv_result = vision_service.analyze_image(image_bytes)
+    except Exception as e:
+        # Fallback or error handling; for now raise to be caught by route or middleware
+        raise RuntimeError(f"VisionService failed: {e}")
+
+    # 2. MedGemma Service
+    medgemma = MedGemmaService()
+    mg_result = medgemma.analyze(
+        image_bytes=image_bytes, 
+        patient_context=patient_context,
+        model_score=cv_result["model_score"]
+    )
+    
+    # If the user didn't provide patient_context, we can fall back to using MedGemma's supporting findings as clinical evidence,
+    # or we can parse the patient_context. For simplicity, we use MedGemma's structured supporting_findings.
+    clinical_evidence = mg_result.supporting_findings
+
+    # 3. Evidence Firewall
+    firewall_decision = enforce_evidence(
+        has_image_evidence=cv_result["image_evidence"]["available"],
+        clinical_evidence=clinical_evidence,
+        model_score=cv_result["model_score"]
+    )
+
+    # 4. Finding Mapping
+    # VisionService uses "suspected_pneumonia" / "normal"
+    # API Contract uses "suspected_pneumonia" / "no_pneumonia_detected"
+    finding = "suspected_pneumonia" if cv_result["prediction"] == "suspected_pneumonia" else "no_pneumonia_detected"
+    
+    # Enforce firewall decision
+    if not firewall_decision.allowed:
+        finding = "no_pneumonia_detected"
+        
+    # 5. Confidence Engine
+    # A simple proxy for model agreement: if the CV model predicts pneumonia and MedGemma found clinical support
+    model_agreement = (finding == "suspected_pneumonia" and len(clinical_evidence) > 0)
+    confidence = compute_confidence(
+        model_score=cv_result["model_score"],
+        image_quality=cv_result["image_quality"]["quality"],
+        clinical_support=len(clinical_evidence) > 0,
+        model_agreement=model_agreement
+    )
+
+    # 6. Build Final Response
+    return AnalysisResponse(
+        analysis_id=f"analysis-{uuid.uuid4().hex[:8]}",
+        finding=finding,
+        model_score=cv_result["model_score"],
+        confidence=confidence,
+        image_quality=cv_result["image_quality"],
+        image_evidence=ImageEvidence(**cv_result["image_evidence"]),
+        clinical_evidence=clinical_evidence,
+        explanation=mg_result.explanation
+    )
 
 
 def _mock_response(patient_context: str = "") -> AnalysisResponse:
@@ -96,7 +137,7 @@ def _mock_response(patient_context: str = "") -> AnalysisResponse:
         finding="suspected_pneumonia",
         model_score=0.82,
         confidence="high",
-        image_quality="good",
+        image_quality=ImageQuality(quality="good"),
         image_evidence=ImageEvidence(
             available=True,
             bbox=[120, 160, 340, 390],

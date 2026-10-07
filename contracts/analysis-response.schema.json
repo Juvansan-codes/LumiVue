@@ -40,9 +40,28 @@
       "description": "Overall confidence level computed by the confidence engine"
     },
     "image_quality": {
-      "type": "string",
-      "enum": ["good", "acceptable", "poor", "rejected"],
-      "description": "Image quality assessment result"
+      "type": "object",
+      "required": ["quality"],
+      "properties": {
+        "quality": {
+          "type": "string",
+          "enum": ["good", "acceptable", "poor", "rejected"],
+          "description": "Image quality assessment result"
+        },
+        "blur_score": {
+          "type": "number",
+          "description": "Quantitative blur score"
+        },
+        "brightness_score": {
+          "type": "number",
+          "description": "Quantitative brightness score"
+        },
+        "contrast_score": {
+          "type": "number",
+          "description": "Quantitative contrast score"
+        }
+      },
+      "description": "Detailed image quality assessment result"
     },
     "image_evidence": {
       "type": "object",
@@ -59,11 +78,15 @@
           },
           "minItems": 4,
           "maxItems": 4,
-          "description": "Bounding box [x_min, y_min, x_max, y_max] of the region of interest"
+          "description": "Bounding box [x, y, width, height] of the model-highlighted visual evidence in original image coordinates"
         },
         "heatmap_available": {
           "type": "boolean",
           "description": "Whether a Grad-CAM heatmap overlay is available"
+        },
+        "heatmap_base64": {
+          "type": ["string", "null"],
+          "description": "Base64 encoded PNG string of the heatmap overlay"
         }
       },
       "description": "Image-level evidence (bounding box, heatmap)"

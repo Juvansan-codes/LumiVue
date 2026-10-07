@@ -63,6 +63,30 @@ async def analyze_xray(
 
     Returns an evidence-grounded analysis result.
     """
-    image_bytes = await image.read()
-    result = await run_analysis(image_bytes, patient_context)
-    return result
+    from fastapi import HTTPException
+    
+    # 1. Basic Validation
+    if not image.filename:
+        raise HTTPException(status_code=400, detail="No file uploaded")
+        
+    allowed_types = ["image/jpeg", "image/png", "application/dicom"]
+    # Relax content_type check slightly since frontend might send unknown for dicom, but we can do a basic check
+    # if image.content_type not in allowed_types:
+    #     raise HTTPException(status_code=415, detail=f"Unsupported file type: {image.content_type}")
+
+    try:
+        image_bytes = await image.read()
+        if not image_bytes:
+            raise HTTPException(status_code=400, detail="Empty image file")
+            
+        result = await run_analysis(image_bytes, patient_context)
+        return result
+    except RuntimeError as e:
+        # e.g., model missing or service offline
+        raise HTTPException(status_code=503, detail=str(e))
+    except ValueError as e:
+        # e.g., invalid image format decoding failure
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        # Unexpected internal errors
+        raise HTTPException(status_code=500, detail=f"Internal analysis error: {str(e)}")

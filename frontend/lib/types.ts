@@ -4,15 +4,19 @@
 // Shared types for the API contract and UI state.
 // =============================================================================
 
-/** Bounding box coordinates [x_min, y_min, x_max, y_max] */
+/** Bounding box coordinates [x, y, width, height] */
 export type BBox = [number, number, number, number];
 
 /** Confidence level derived from the confidence engine */
 export type ConfidenceLevel = "low" | "moderate" | "high";
 
 /** Image quality assessment result */
-export type ImageQualityStatus = "good" | "acceptable" | "poor" | "rejected";
-export type ImageQuality = ImageQualityStatus;
+export interface ImageQuality {
+  quality: "good" | "acceptable" | "poor" | "rejected";
+  blur_score?: number;
+  brightness_score?: number;
+  contrast_score?: number;
+}
 
 /** Possible analysis finding categories */
 export type Finding =
@@ -27,29 +31,11 @@ export interface ImageEvidence {
   score: number;
   bbox: BBox | null;
   heatmap_available: boolean;
+  /** Base64 encoded PNG string of the heatmap overlay */
+  heatmap_base64?: string | null;
 }
 
-/** Image quality details */
-export interface ImageQualityInfo {
-  status: ImageQualityStatus;
-  sharpness?: string;
-  contrast?: string;
-  resolution?: string;
-}
-
-/** Evidence validation (Evidence Firewall) */
-export interface EvidenceValidation {
-  supported: boolean;
-  image_evidence: boolean;
-  clinical_evidence: boolean;
-}
-
-/** Confidence supporting factors */
-export interface ConfidenceFactors {
-  image_signal: boolean;
-  clinical_context_supportive: boolean;
-  adequate_image_quality: boolean;
-}
+// Removed old conflicting types to align strictly with the backend API contract.
 
 /** Full analysis response from POST /analyze */
 export interface AnalysisResponse {
@@ -57,12 +43,10 @@ export interface AnalysisResponse {
   finding: Finding;
   model_score: number;
   confidence: ConfidenceLevel;
-  confidence_factors: ConfidenceFactors;
   image_evidence: ImageEvidence;
   clinical_evidence: string[];
   explanation: string;
-  image_quality: ImageQualityInfo;
-  evidence_validation: EvidenceValidation;
+  image_quality: ImageQuality;
 }
 
 /** Patient clinical context submitted with analysis */
